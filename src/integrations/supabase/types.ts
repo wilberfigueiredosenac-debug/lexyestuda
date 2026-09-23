@@ -35,6 +35,38 @@ export type Database = {
         }
         Relationships: []
       }
+      pronunciation_plays: {
+        Row: {
+          created_at: string
+          id: string
+          term: string
+          user_id: string
+          word_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          term: string
+          user_id: string
+          word_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          term?: string
+          user_id?: string
+          word_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pronunciation_plays_word_id_fkey"
+            columns: ["word_id"]
+            isOneToOne: false
+            referencedRelation: "words"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           answer: string
@@ -97,12 +129,59 @@ export type Database = {
         }
         Relationships: []
       }
+      study_activity: {
+        Row: {
+          count: number
+          day: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          day: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          day?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      study_goals: {
+        Row: {
+          created_at: string
+          daily_target: number
+          reminder_enabled: boolean
+          reminder_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_target?: number
+          reminder_enabled?: boolean
+          reminder_time?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_target?: number
+          reminder_enabled?: boolean
+          reminder_time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       vocabulary: {
         Row: {
           created_at: string
           favorite: boolean
           id: string
+          last_played_at: string | null
           note: string
+          play_count: number
           user_id: string
           word_id: string
         }
@@ -110,7 +189,9 @@ export type Database = {
           created_at?: string
           favorite?: boolean
           id?: string
+          last_played_at?: string | null
           note?: string
+          play_count?: number
           user_id: string
           word_id: string
         }
@@ -118,7 +199,9 @@ export type Database = {
           created_at?: string
           favorite?: boolean
           id?: string
+          last_played_at?: string | null
           note?: string
+          play_count?: number
           user_id?: string
           word_id?: string
         }
@@ -185,7 +268,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      log_pronunciation: {
+        Args: { _term: string; _word_id: string }
+        Returns: undefined
+      }
+      log_study: {
+        Args: { _amount?: number; _day: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

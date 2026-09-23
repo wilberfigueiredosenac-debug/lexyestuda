@@ -1,4 +1,5 @@
 import type { WordRow } from "@/lib/lexy.functions";
+import { PronounceButton } from "@/components/PronounceButton";
 
 function asList(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
@@ -15,7 +16,15 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
-export function WordDetails({ word }: { word: WordRow }) {
+export function WordDetails({
+  word,
+  playCount,
+  lastPlayedAt,
+}: {
+  word: WordRow;
+  playCount?: number;
+  lastPlayedAt?: string | null;
+}) {
   const otherMeanings = asList(word.other_meanings);
   const examples = asList(word.examples);
   const synonyms = asList(word.synonyms);
@@ -24,12 +33,21 @@ export function WordDetails({ word }: { word: WordRow }) {
   return (
     <article className="paper-card flex flex-col gap-5 p-6">
       <header>
-        <h2 className="font-display text-4xl font-black uppercase tracking-tight">
-          {word.display_term}
-        </h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className="font-display text-4xl font-black uppercase tracking-tight">
+            {word.display_term}
+          </h2>
+          <PronounceButton term={word.display_term} wordId={word.id} />
+        </div>
         {word.word_class && (
           <p className="mt-1 inline-block rounded-full bg-secondary px-3 py-1 text-sm font-bold text-secondary-foreground">
             {word.word_class}
+          </p>
+        )}
+        {playCount !== undefined && (
+          <p className="mt-2 text-xs font-bold text-muted-foreground">
+            Pronúncia ouvida {playCount} {playCount === 1 ? "vez" : "vezes"}
+            {lastPlayedAt && ` · última em ${new Date(lastPlayedAt).toLocaleDateString("pt-BR")}`}
           </p>
         )}
       </header>

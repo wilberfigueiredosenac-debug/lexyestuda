@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { BookMarked, Home, Sparkles, User } from "lucide-react";
+import { BookMarked, Home, Sparkles, User, Wand2 } from "lucide-react";
+import { StudyReminder } from "@/components/StudyReminder";
 import type { ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
 
@@ -7,6 +8,7 @@ const navItems = [
   { to: "/", label: "Início", icon: Home },
   { to: "/vocabulario", label: "Vocabulário", icon: BookMarked },
   { to: "/revisao", label: "Revisão", icon: Sparkles },
+  { to: "/exercicios", label: "Exercícios", icon: Wand2 },
   { to: "/perfil", label: "Perfil", icon: User },
 ] as const;
 
@@ -42,7 +44,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 pb-28 pt-6">{children}</main>
+      <main className="mx-auto w-full max-w-4xl flex-1 px-4 pb-28 pt-6">
+        {user && <StudyReminder />}
+        {children}
+      </main>
 
       <nav className="fixed bottom-0 left-0 right-0 z-20 border-t-2 border-border bg-background">
         <div className="mx-auto flex w-full max-w-4xl">

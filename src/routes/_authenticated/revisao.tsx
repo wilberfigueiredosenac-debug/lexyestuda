@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { generateReview } from "@/lib/lexy.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { logStudy } from "@/lib/study";
 
 export const Route = createFileRoute("/_authenticated/revisao")({
   head: () => ({
@@ -76,6 +77,7 @@ function ReviewPage() {
       answer: current.options[option] ?? "",
       correct,
     });
+    await logStudy();
   }
 
   function next() {
@@ -108,6 +110,9 @@ function ReviewPage() {
           >
             <Sparkles className="h-5 w-5" aria-hidden /> Começar revisão
           </button>
+          <Link to="/exercicios" className="text-center text-sm font-bold underline">
+            Prefere escolher uma palavra, texto ou tema? Crie exercícios personalizados
+          </Link>
         </div>
       )}
 

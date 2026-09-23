@@ -12,9 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedExerciciosRouteImport } from './routes/_authenticated/exercicios'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedRevisaoRouteImport } from './routes/_authenticated/revisao'
 import { Route as AuthenticatedVocabularioRouteImport } from './routes/_authenticated/vocabulario'
+import { Route as ApiPronunciaRouteImport } from './routes/api/pronuncia'
 import { Route as PalavraTermoRouteImport } from './routes/palavra.$termo'
 
 const IndexRoute = IndexRouteImport.update({
@@ -30,6 +32,11 @@ const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedExerciciosRoute = AuthenticatedExerciciosRouteImport.update({
+  id: '/exercicios',
+  path: '/exercicios',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
@@ -47,6 +54,11 @@ const AuthenticatedVocabularioRoute =
     path: '/vocabulario',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPronunciaRoute = ApiPronunciaRouteImport.update({
+  id: '/api/pronuncia',
+  path: '/api/pronuncia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PalavraTermoRoute = PalavraTermoRouteImport.update({
   id: '/palavra/$termo',
   path: '/palavra/$termo',
@@ -56,17 +68,21 @@ const PalavraTermoRoute = PalavraTermoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/exercicios': typeof AuthenticatedExerciciosRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/revisao': typeof AuthenticatedRevisaoRoute
   '/vocabulario': typeof AuthenticatedVocabularioRoute
+  '/api/pronuncia': typeof ApiPronunciaRoute
   '/palavra/$termo': typeof PalavraTermoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/exercicios': typeof AuthenticatedExerciciosRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/revisao': typeof AuthenticatedRevisaoRoute
   '/vocabulario': typeof AuthenticatedVocabularioRoute
+  '/api/pronuncia': typeof ApiPronunciaRoute
   '/palavra/$termo': typeof PalavraTermoRoute
 }
 export interface FileRoutesById {
@@ -74,26 +90,44 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/exercicios': typeof AuthenticatedExerciciosRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/revisao': typeof AuthenticatedRevisaoRoute
   '/_authenticated/vocabulario': typeof AuthenticatedVocabularioRoute
+  '/api/pronuncia': typeof ApiPronunciaRoute
   '/palavra/$termo': typeof PalavraTermoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/perfil' | '/revisao' | '/vocabulario' | '/palavra/$termo'
+    | '/'
+    | '/auth'
+    | '/exercicios'
+    | '/perfil'
+    | '/revisao'
+    | '/vocabulario'
+    | '/api/pronuncia'
+    | '/palavra/$termo'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/auth' | '/perfil' | '/revisao' | '/vocabulario' | '/palavra/$termo'
+    | '/'
+    | '/auth'
+    | '/exercicios'
+    | '/perfil'
+    | '/revisao'
+    | '/vocabulario'
+    | '/api/pronuncia'
+    | '/palavra/$termo'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/exercicios'
     | '/_authenticated/perfil'
     | '/_authenticated/revisao'
     | '/_authenticated/vocabulario'
+    | '/api/pronuncia'
     | '/palavra/$termo'
   fileRoutesById: FileRoutesById
 }
@@ -101,6 +135,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPronunciaRoute: typeof ApiPronunciaRoute
   PalavraTermoRoute: typeof PalavraTermoRoute
 }
 
@@ -127,6 +162,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/exercicios': {
+      id: '/_authenticated/exercicios'
+      path: '/exercicios'
+      fullPath: '/exercicios'
+      preLoaderRoute: typeof AuthenticatedExerciciosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/perfil': {
       id: '/_authenticated/perfil'
       path: '/perfil'
@@ -148,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVocabularioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/pronuncia': {
+      id: '/api/pronuncia'
+      path: '/api/pronuncia'
+      fullPath: '/api/pronuncia'
+      preLoaderRoute: typeof ApiPronunciaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/palavra/$termo': {
       id: '/palavra/$termo'
       path: '/palavra/$termo'
@@ -159,12 +208,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedExerciciosRoute: typeof AuthenticatedExerciciosRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedRevisaoRoute: typeof AuthenticatedRevisaoRoute
   AuthenticatedVocabularioRoute: typeof AuthenticatedVocabularioRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedExerciciosRoute: AuthenticatedExerciciosRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedRevisaoRoute: AuthenticatedRevisaoRoute,
   AuthenticatedVocabularioRoute: AuthenticatedVocabularioRoute,
@@ -177,6 +228,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPronunciaRoute: ApiPronunciaRoute,
   PalavraTermoRoute: PalavraTermoRoute,
 }
 export const routeTree = rootRouteImport

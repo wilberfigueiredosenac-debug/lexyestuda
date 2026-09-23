@@ -9,6 +9,7 @@ import { WordDetails } from "@/components/WordDetails";
 import { SearchBar } from "@/components/SearchBar";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { logStudy } from "@/lib/study";
 
 export const Route = createFileRoute("/palavra/$termo")({
   head: ({ params }) => {
@@ -72,6 +73,7 @@ function WordPage() {
         .from("vocabulary")
         .insert({ user_id: user.id, word_id: word.id });
       if (error) throw error;
+      await logStudy();
     },
     onSuccess: () => {
       toast.success("Palavra adicionada ao seu vocabulário!");

@@ -31,6 +31,8 @@ type Entry = {
   note: string;
   favorite: boolean;
   created_at: string;
+  play_count: number;
+  last_played_at: string | null;
   words: WordRow | null;
 };
 
@@ -47,7 +49,7 @@ function VocabularyPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("vocabulary")
-        .select("id, note, favorite, created_at, words(*)")
+        .select("id, note, favorite, created_at, play_count, last_played_at, words(*)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as Entry[];
@@ -163,7 +165,11 @@ function VocabularyPage() {
                 Fechar
               </button>
             </div>
-            <WordDetails word={open.words} />
+            <WordDetails
+              word={open.words}
+              playCount={open.play_count}
+              lastPlayedAt={open.last_played_at}
+            />
 
             <div className="paper-card mt-4 flex flex-col gap-3 p-4">
               <label className="text-xs font-black uppercase tracking-wide text-muted-foreground">

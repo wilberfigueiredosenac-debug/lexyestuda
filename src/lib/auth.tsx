@@ -28,6 +28,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const user = session?.user;
+    if (!user) return;
+    const meta = user.user_metadata as { name?: string; full_name?: string } | undefined;
+    void supabase.from("profiles").upsert(
+      {
+        id: user.id,
+        name: meta?.name || meta?.full_name || user.email?.split("@")[0] || "Estudante",
+        email: user.email ?? null,
+      },
+      { onConflict: "id" },
+    );
+  }, [session?.user]);
+
   const value = useMemo(
     () => ({ session, user: session?.user ?? null, loading }),
     [session, loading],

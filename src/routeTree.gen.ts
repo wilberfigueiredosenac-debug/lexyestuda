@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedRevisaoRouteImport } from './routes/_authenticated/revisao'
 import { Route as AuthenticatedVocabularioRouteImport } from './routes/_authenticated/vocabulario'
 import { Route as PalavraTermoRouteImport } from './routes/palavra.$termo'
 
@@ -29,6 +31,16 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRevisaoRoute = AuthenticatedRevisaoRouteImport.update({
+  id: '/revisao',
+  path: '/revisao',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedVocabularioRoute =
   AuthenticatedVocabularioRouteImport.update({
     id: '/vocabulario',
@@ -44,12 +56,16 @@ const PalavraTermoRoute = PalavraTermoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
+  '/revisao': typeof AuthenticatedRevisaoRoute
   '/vocabulario': typeof AuthenticatedVocabularioRoute
   '/palavra/$termo': typeof PalavraTermoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
+  '/revisao': typeof AuthenticatedRevisaoRoute
   '/vocabulario': typeof AuthenticatedVocabularioRoute
   '/palavra/$termo': typeof PalavraTermoRoute
 }
@@ -58,19 +74,25 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/revisao': typeof AuthenticatedRevisaoRoute
   '/_authenticated/vocabulario': typeof AuthenticatedVocabularioRoute
   '/palavra/$termo': typeof PalavraTermoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/vocabulario' | '/palavra/$termo'
+  fullPaths:
+    '/' | '/auth' | '/perfil' | '/revisao' | '/vocabulario' | '/palavra/$termo'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/vocabulario' | '/palavra/$termo'
+  to:
+    '/' | '/auth' | '/perfil' | '/revisao' | '/vocabulario' | '/palavra/$termo'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/perfil'
+    | '/_authenticated/revisao'
     | '/_authenticated/vocabulario'
     | '/palavra/$termo'
   fileRoutesById: FileRoutesById
@@ -105,6 +127,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/perfil': {
+      id: '/_authenticated/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/revisao': {
+      id: '/_authenticated/revisao'
+      path: '/revisao'
+      fullPath: '/revisao'
+      preLoaderRoute: typeof AuthenticatedRevisaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/vocabulario': {
       id: '/_authenticated/vocabulario'
       path: '/vocabulario'
@@ -123,10 +159,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedRevisaoRoute: typeof AuthenticatedRevisaoRoute
   AuthenticatedVocabularioRoute: typeof AuthenticatedVocabularioRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedRevisaoRoute: AuthenticatedRevisaoRoute,
   AuthenticatedVocabularioRoute: AuthenticatedVocabularioRoute,
 }
 

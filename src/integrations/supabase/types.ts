@@ -14,7 +14,172 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+          name?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          answer: string
+          correct: boolean
+          created_at: string
+          id: string
+          question: string
+          term: string
+          user_id: string
+          word_id: string | null
+        }
+        Insert: {
+          answer?: string
+          correct?: boolean
+          created_at?: string
+          id?: string
+          question: string
+          term: string
+          user_id: string
+          word_id?: string | null
+        }
+        Update: {
+          answer?: string
+          correct?: boolean
+          created_at?: string
+          id?: string
+          question?: string
+          term?: string
+          user_id?: string
+          word_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_word_id_fkey"
+            columns: ["word_id"]
+            isOneToOne: false
+            referencedRelation: "words"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      search_history: {
+        Row: {
+          created_at: string
+          id: string
+          term: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          term: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          term?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vocabulary: {
+        Row: {
+          created_at: string
+          favorite: boolean
+          id: string
+          note: string
+          user_id: string
+          word_id: string
+        }
+        Insert: {
+          created_at?: string
+          favorite?: boolean
+          id?: string
+          note?: string
+          user_id: string
+          word_id: string
+        }
+        Update: {
+          created_at?: string
+          favorite?: boolean
+          id?: string
+          note?: string
+          user_id?: string
+          word_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vocabulary_word_id_fkey"
+            columns: ["word_id"]
+            isOneToOne: false
+            referencedRelation: "words"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      words: {
+        Row: {
+          antonyms: Json
+          context_note: string | null
+          created_at: string
+          display_term: string
+          examples: Json
+          id: string
+          meaning: string
+          other_meanings: Json
+          polysemy: string | null
+          regional_note: string | null
+          synonyms: Json
+          term: string
+          word_class: string | null
+        }
+        Insert: {
+          antonyms?: Json
+          context_note?: string | null
+          created_at?: string
+          display_term: string
+          examples?: Json
+          id?: string
+          meaning: string
+          other_meanings?: Json
+          polysemy?: string | null
+          regional_note?: string | null
+          synonyms?: Json
+          term: string
+          word_class?: string | null
+        }
+        Update: {
+          antonyms?: Json
+          context_note?: string | null
+          created_at?: string
+          display_term?: string
+          examples?: Json
+          id?: string
+          meaning?: string
+          other_meanings?: Json
+          polysemy?: string | null
+          regional_note?: string | null
+          synonyms?: Json
+          term?: string
+          word_class?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

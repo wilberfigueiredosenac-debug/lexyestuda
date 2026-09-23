@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedRevisaoRouteImport } from './routes/_authenticated/revisao'
 import { Route as AuthenticatedVocabularioRouteImport } from './routes/_authenticated/vocabulario'
+import { Route as ApiPronunciaRouteImport } from './routes/api/pronuncia'
 import { Route as PalavraTermoRouteImport } from './routes/palavra.$termo'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +48,11 @@ const AuthenticatedVocabularioRoute =
     path: '/vocabulario',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPronunciaRoute = ApiPronunciaRouteImport.update({
+  id: '/api/pronuncia',
+  path: '/api/pronuncia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PalavraTermoRoute = PalavraTermoRouteImport.update({
   id: '/palavra/$termo',
   path: '/palavra/$termo',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/revisao': typeof AuthenticatedRevisaoRoute
   '/vocabulario': typeof AuthenticatedVocabularioRoute
+  '/api/pronuncia': typeof ApiPronunciaRoute
   '/palavra/$termo': typeof PalavraTermoRoute
 }
 export interface FileRoutesByTo {
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/revisao': typeof AuthenticatedRevisaoRoute
   '/vocabulario': typeof AuthenticatedVocabularioRoute
+  '/api/pronuncia': typeof ApiPronunciaRoute
   '/palavra/$termo': typeof PalavraTermoRoute
 }
 export interface FileRoutesById {
@@ -77,15 +85,28 @@ export interface FileRoutesById {
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/revisao': typeof AuthenticatedRevisaoRoute
   '/_authenticated/vocabulario': typeof AuthenticatedVocabularioRoute
+  '/api/pronuncia': typeof ApiPronunciaRoute
   '/palavra/$termo': typeof PalavraTermoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/perfil' | '/revisao' | '/vocabulario' | '/palavra/$termo'
+    | '/'
+    | '/auth'
+    | '/perfil'
+    | '/revisao'
+    | '/vocabulario'
+    | '/api/pronuncia'
+    | '/palavra/$termo'
   fileRoutesByTo: FileRoutesByTo
   to:
-    '/' | '/auth' | '/perfil' | '/revisao' | '/vocabulario' | '/palavra/$termo'
+    | '/'
+    | '/auth'
+    | '/perfil'
+    | '/revisao'
+    | '/vocabulario'
+    | '/api/pronuncia'
+    | '/palavra/$termo'
   id:
     | '__root__'
     | '/'
@@ -94,6 +115,7 @@ export interface FileRouteTypes {
     | '/_authenticated/perfil'
     | '/_authenticated/revisao'
     | '/_authenticated/vocabulario'
+    | '/api/pronuncia'
     | '/palavra/$termo'
   fileRoutesById: FileRoutesById
 }
@@ -101,6 +123,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPronunciaRoute: typeof ApiPronunciaRoute
   PalavraTermoRoute: typeof PalavraTermoRoute
 }
 
@@ -148,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVocabularioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/pronuncia': {
+      id: '/api/pronuncia'
+      path: '/api/pronuncia'
+      fullPath: '/api/pronuncia'
+      preLoaderRoute: typeof ApiPronunciaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/palavra/$termo': {
       id: '/palavra/$termo'
       path: '/palavra/$termo'
@@ -177,6 +207,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPronunciaRoute: ApiPronunciaRoute,
   PalavraTermoRoute: PalavraTermoRoute,
 }
 export const routeTree = rootRouteImport

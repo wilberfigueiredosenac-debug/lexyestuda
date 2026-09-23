@@ -212,3 +212,56 @@ export const generateReview = createServerFn({ method: "POST" })
       throw new Error("Não foi possível criar a revisão agora. Tente novamente.");
     }
   });
+
+const customQuizSchema = z.object({
+  questions: z.array(
+    z.object({
+      term: z.string(),
+      type: z.string(),
+      question: z.string(),
+      options: z.array(z.string()),
+      correctIndex: z.number(),
+      explanation: z.string(),
+    }),
+  ),
+});
+
+export const generateCustomExercises = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        source: z.string().trim().min(1).max(3000),
+        level: z.enum(["fundamental", "medio"]),
+        count: z.number().int().min(3).max(10),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    try {
+      const result = streamText({
+        model: aiModel(),
+        system: `Você é o LEXY, professor de Língua Portuguesa. Crie exercícios de vocabulário personalizados, em português do Brasil, adequados a estudantes do Ensino ${
+          data.level === "medio" ? "Médio" : "Fundamental"
+        }.
+O aluno pode enviar uma palavra, um texto ou um tema:
+- Palavra: explore significado, sinônimos, antônimos, polissemia e uso em frases.
+- Texto: escolha palavras importantes do texto e pergunte o sentido delas no contexto.
+- Tema: selecione vocabulário relevante sobre o tema.
+Varie os tipos (type): "significado", "sinônimo", "antônimo", "contexto", "completar frase", "polissemia".
+Cada pergunta tem exatamente 4 alternativas diferentes, apenas uma correta; correctIndex é o índice (0 a 3) da correta; term é a palavra trabalhada; explanation é uma frase curta explicando a resposta.`,
+        prompt: `Crie exatamente ${data.count} exercícios a partir de:\n"""\n${data.source}\n"""`,
+        output: Output.object({ schema: customQuizSchema }),
+        providerOptions: reasoningOptions,
+      });
+      const quiz = await result.output;
+      const questions = quiz.questions
+        .filter((q) => q.options.length >= 2 && q.correctIndex >= 0 && q.correctIndex < q.options.length)
+        .slice(0, data.count);
+      if (questions.length === 0) throw new Error("empty");
+      return { questions };
+    } catch (error) {
+      console.error("[lexy] generateCustomExercises", error);
+      throw new Error("Não foi possível criar os exercícios agora. Tente novamente.");
+    }
+  });

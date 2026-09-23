@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedVocabularioRouteImport } from './routes/_authenticated/vocabulario'
 import { Route as PalavraTermoRouteImport } from './routes/palavra.$termo'
 
 const IndexRoute = IndexRouteImport.update({
@@ -18,11 +20,21 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedVocabularioRoute =
+  AuthenticatedVocabularioRouteImport.update({
+    id: '/vocabulario',
+    path: '/vocabulario',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const PalavraTermoRoute = PalavraTermoRouteImport.update({
   id: '/palavra/$termo',
   path: '/palavra/$termo',
@@ -32,29 +44,40 @@ const PalavraTermoRoute = PalavraTermoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/vocabulario': typeof AuthenticatedVocabularioRoute
   '/palavra/$termo': typeof PalavraTermoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/vocabulario': typeof AuthenticatedVocabularioRoute
   '/palavra/$termo': typeof PalavraTermoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/vocabulario': typeof AuthenticatedVocabularioRoute
   '/palavra/$termo': typeof PalavraTermoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/palavra/$termo'
+  fullPaths: '/' | '/auth' | '/vocabulario' | '/palavra/$termo'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/palavra/$termo'
-  id: '__root__' | '/' | '/auth' | '/palavra/$termo'
+  to: '/' | '/auth' | '/vocabulario' | '/palavra/$termo'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/vocabulario'
+    | '/palavra/$termo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   PalavraTermoRoute: typeof PalavraTermoRoute
 }
@@ -68,12 +91,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/vocabulario': {
+      id: '/_authenticated/vocabulario'
+      path: '/vocabulario'
+      fullPath: '/vocabulario'
+      preLoaderRoute: typeof AuthenticatedVocabularioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/palavra/$termo': {
       id: '/palavra/$termo'
@@ -85,8 +122,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedVocabularioRoute: typeof AuthenticatedVocabularioRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedVocabularioRoute: AuthenticatedVocabularioRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   PalavraTermoRoute: PalavraTermoRoute,
 }

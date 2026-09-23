@@ -97,7 +97,10 @@ function ExercisesPage() {
   }
 
   function next() {
-    if (index + 1 >= questions.length) return setDone(true);
+    if (index + 1 >= questions.length) {
+      setDone(true);
+      return;
+    }
     setIndex(index + 1);
     setChosen(null);
   }
@@ -121,7 +124,10 @@ function ExercisesPage() {
           className="paper-card flex flex-col gap-4 p-6"
           onSubmit={(e) => {
             e.preventDefault();
-            if (!source.trim()) return toast.info("Escreva algo para gerar os exercícios.");
+            if (!source.trim()) {
+              toast.info("Escreva algo para gerar os exercícios.");
+              return;
+            }
             start.mutate();
           }}
         >

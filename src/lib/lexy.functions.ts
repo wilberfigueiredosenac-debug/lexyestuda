@@ -224,7 +224,50 @@ const customQuizSchema = z.object({
       explanation: z.string(),
     }),
   ),
+  sentences: z.array(
+    z.object({
+      term: z.string(),
+      prompt: z.string(),
+      sampleAnswer: z.string(),
+    }),
+  ),
 });
+
+const sentenceCheckSchema = z.object({
+  correct: z.boolean(),
+  feedback: z.string(),
+  improved: z.string(),
+});
+
+export const checkSentence = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        term: z.string().trim().min(1).max(80),
+        prompt: z.string().trim().min(1).max(500),
+        answer: z.string().trim().min(1).max(600),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    try {
+      const result = streamText({
+        model: aiModel(),
+        system: `Você é o LEXY, professor de Língua Portuguesa, gentil e encorajador. Corrija a frase escrita por um estudante em português do Brasil.
+correct = true quando a frase usa a palavra-alvo com o sentido adequado e atende ao pedido (pequenos deslizes de digitação não reprovam).
+feedback: 1 ou 2 frases curtas e simples explicando o acerto ou o que melhorar.
+improved: uma versão corrigida/melhorada da frase do aluno.`,
+        prompt: `Palavra-alvo: ${data.term}\nPedido: ${data.prompt}\nFrase do aluno: """${data.answer}"""`,
+        output: Output.object({ schema: sentenceCheckSchema }),
+        providerOptions: reasoningOptions,
+      });
+      return await result.output;
+    } catch (error) {
+      console.error("[lexy] checkSentence", error);
+      throw new Error("Não foi possível corrigir a frase agora. Tente novamente.");
+    }
+  });
 
 export const generateCustomExercises = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

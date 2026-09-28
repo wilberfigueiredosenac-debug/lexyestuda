@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BookMarked, Home, Sparkles, User, Wand2 } from "lucide-react";
+import { BookMarked, CalendarCheck, Home, Sparkles, User, Wand2 } from "lucide-react";
 import { StudyReminder } from "@/components/StudyReminder";
 import type { ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 const navItems = [
   { to: "/", label: "Início", icon: Home },
   { to: "/vocabulario", label: "Vocabulário", icon: BookMarked },
+  { to: "/estudo", label: "Estudo", icon: CalendarCheck },
   { to: "/revisao", label: "Revisão", icon: Sparkles },
   { to: "/exercicios", label: "Exercícios", icon: Wand2 },
   { to: "/perfil", label: "Perfil", icon: User },

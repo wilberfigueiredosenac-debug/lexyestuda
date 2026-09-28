@@ -224,7 +224,50 @@ const customQuizSchema = z.object({
       explanation: z.string(),
     }),
   ),
+  sentences: z.array(
+    z.object({
+      term: z.string(),
+      prompt: z.string(),
+      sampleAnswer: z.string(),
+    }),
+  ),
 });
+
+const sentenceCheckSchema = z.object({
+  correct: z.boolean(),
+  feedback: z.string(),
+  improved: z.string(),
+});
+
+export const checkSentence = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        term: z.string().trim().min(1).max(80),
+        prompt: z.string().trim().min(1).max(500),
+        answer: z.string().trim().min(1).max(600),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    try {
+      const result = streamText({
+        model: aiModel(),
+        system: `Você é o LEXY, professor de Língua Portuguesa, gentil e encorajador. Corrija a frase escrita por um estudante em português do Brasil.
+correct = true quando a frase usa a palavra-alvo com o sentido adequado e atende ao pedido (pequenos deslizes de digitação não reprovam).
+feedback: 1 ou 2 frases curtas e simples explicando o acerto ou o que melhorar.
+improved: uma versão corrigida/melhorada da frase do aluno.`,
+        prompt: `Palavra-alvo: ${data.term}\nPedido: ${data.prompt}\nFrase do aluno: """${data.answer}"""`,
+        output: Output.object({ schema: sentenceCheckSchema }),
+        providerOptions: reasoningOptions,
+      });
+      return await result.output;
+    } catch (error) {
+      console.error("[lexy] checkSentence", error);
+      throw new Error("Não foi possível corrigir a frase agora. Tente novamente.");
+    }
+  });
 
 export const generateCustomExercises = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -249,8 +292,9 @@ O aluno pode enviar uma palavra, um texto ou um tema:
 - Texto: escolha palavras importantes do texto e pergunte o sentido delas no contexto.
 - Tema: selecione vocabulário relevante sobre o tema.
 Varie os tipos (type): "significado", "sinônimo", "antônimo", "contexto", "completar frase", "polissemia".
-Cada pergunta tem exatamente 4 alternativas diferentes, apenas uma correta; correctIndex é o índice (0 a 3) da correta; term é a palavra trabalhada; explanation é uma frase curta explicando a resposta.`,
-        prompt: `Crie exatamente ${data.count} exercícios a partir de:\n"""\n${data.source}\n"""`,
+Cada pergunta tem exatamente 4 alternativas diferentes, apenas uma correta; correctIndex é o índice (0 a 3) da correta; term é a palavra trabalhada; explanation é uma frase curta explicando a resposta.
+Além disso, crie de 2 a 3 "sentences": desafios de escrita em que o aluno escreve uma frase própria usando uma palavra (term). prompt é o pedido claro (ex.: "Escreva uma frase usando 'saudade' para falar de uma viagem."); sampleAnswer é um exemplo de boa resposta.`,
+        prompt: `Crie exatamente ${data.count} exercícios de múltipla escolha e de 2 a 3 frases para responder a partir de:\n"""\n${data.source}\n"""`,
         output: Output.object({ schema: customQuizSchema }),
         providerOptions: reasoningOptions,
       });
@@ -258,8 +302,9 @@ Cada pergunta tem exatamente 4 alternativas diferentes, apenas uma correta; corr
       const questions = quiz.questions
         .filter((q) => q.options.length >= 2 && q.correctIndex >= 0 && q.correctIndex < q.options.length)
         .slice(0, data.count);
+      const sentences = quiz.sentences.filter((s) => s.prompt.trim()).slice(0, 3);
       if (questions.length === 0) throw new Error("empty");
-      return { questions };
+      return { questions, sentences };
     } catch (error) {
       console.error("[lexy] generateCustomExercises", error);
       throw new Error("Não foi possível criar os exercícios agora. Tente novamente.");

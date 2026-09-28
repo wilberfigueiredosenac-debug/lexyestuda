@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
-import { generateCustomExercises } from "@/lib/lexy.functions";
+import { checkSentence, generateCustomExercises } from "@/lib/lexy.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { logStudy } from "@/lib/study";
@@ -38,6 +38,9 @@ type Question = {
   explanation: string;
 };
 
+type Sentence = { term: string; prompt: string; sampleAnswer: string };
+type Check = { correct: boolean; feedback: string; improved: string };
+
 const MODES = [
   { id: "palavra", label: "Palavra", placeholder: "Ex.: saudade" },
   { id: "texto", label: "Texto", placeholder: "Cole aqui um trecho de texto..." },
@@ -57,16 +60,30 @@ function ExercisesPage() {
   const [chosen, setChosen] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
+  const [sentences, setSentences] = useState<Sentence[]>([]);
+  const [sIndex, setSIndex] = useState(0);
+  const [inSentences, setInSentences] = useState(false);
+  const [written, setWritten] = useState("");
+  const [check, setCheck] = useState<Check | null>(null);
+  const [sScore, setSScore] = useState(0);
+  const correct = useServerFn(checkSentence);
 
   const start = useMutation({
     mutationFn: async () => {
       const prefix = mode === "palavra" ? "Palavra" : mode === "texto" ? "Texto" : "Tema";
       return (await run({ data: { source: `${prefix}: ${source.trim()}`, level, count } })) as {
         questions: Question[];
+        sentences: Sentence[];
       };
     },
     onSuccess: (data) => {
       setQuestions(data.questions);
+      setSentences(data.sentences ?? []);
+      setSIndex(0);
+      setInSentences(false);
+      setWritten("");
+      setCheck(null);
+      setSScore(0);
       setIndex(0);
       setChosen(null);
       setScore(0);
@@ -98,12 +115,51 @@ function ExercisesPage() {
 
   function next() {
     if (index + 1 >= questions.length) {
-      setDone(true);
+      if (sentences.length > 0) setInSentences(true);
+      else setDone(true);
       return;
     }
     setIndex(index + 1);
     setChosen(null);
   }
+
+  const verify = useMutation({
+    mutationFn: async () => {
+      const s = sentences[sIndex]!;
+      return (await correct({ data: { term: s.term, prompt: s.prompt, answer: written } })) as Check;
+    },
+    onSuccess: async (result) => {
+      setCheck(result);
+      if (result.correct) setSScore((v) => v + 1);
+      const s = sentences[sIndex]!;
+      if (user) {
+        await supabase.from("reviews").insert({
+          user_id: user.id,
+          word_id: null,
+          term: s.term,
+          question: s.prompt,
+          answer: written,
+          correct: result.correct,
+        });
+      }
+      await logStudy();
+      void queryClient.invalidateQueries({ queryKey: ["profile-stats"] });
+    },
+    onError: (error) => toast.error(error instanceof Error ? error.message : "Não foi possível corrigir."),
+  });
+
+  function nextSentence() {
+    if (sIndex + 1 >= sentences.length) {
+      setInSentences(false);
+      setDone(true);
+      return;
+    }
+    setSIndex(sIndex + 1);
+    setWritten("");
+    setCheck(null);
+  }
+
+  const currentSentence = inSentences ? sentences[sIndex] : undefined;
 
   function reset() {
     setQuestions([]);
@@ -206,7 +262,7 @@ function ExercisesPage() {
         </div>
       )}
 
-      {current && !done && (
+      {current && !done && !inSentences && (
         <div className="paper-card flex flex-col gap-4 p-6">
           <p className="text-xs font-black uppercase tracking-wide text-muted-foreground">
             Exercício {index + 1} de {questions.length} — {current.type} · {current.term}
@@ -244,11 +300,63 @@ function ExercisesPage() {
         </div>
       )}
 
+      {currentSentence && (
+        <div className="paper-card flex flex-col gap-4 p-6">
+          <p className="text-xs font-black uppercase tracking-wide text-muted-foreground">
+            Frase {sIndex + 1} de {sentences.length} · {currentSentence.term}
+          </p>
+          <p className="text-lg font-bold">{currentSentence.prompt}</p>
+          <textarea
+            aria-label="Sua frase"
+            value={written}
+            onChange={(e) => setWritten(e.target.value)}
+            disabled={!!check || verify.isPending}
+            rows={3}
+            maxLength={600}
+            placeholder="Escreva sua frase aqui..."
+            className="rounded-xl border-2 border-border bg-card p-3 text-base"
+          />
+          {!check ? (
+            <button
+              onClick={() => written.trim() && verify.mutate()}
+              disabled={!written.trim() || verify.isPending}
+              className="flex h-12 items-center justify-center gap-2 rounded-xl bg-accent font-black text-accent-foreground disabled:opacity-50"
+            >
+              {verify.isPending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
+              Corrigir minha frase
+            </button>
+          ) : (
+            <>
+              <div
+                className={`rounded-xl border-2 p-4 ${check.correct ? "border-accent bg-accent/15" : "border-destructive bg-destructive/10"}`}
+              >
+                <p className="font-black">{check.correct ? "Muito bem!" : "Quase lá!"}</p>
+                <p className="text-sm">{check.feedback}</p>
+                <p className="mt-2 text-sm">
+                  <span className="font-bold">Sugestão:</span> {check.improved}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  <span className="font-bold">Exemplo:</span> {currentSentence.sampleAnswer}
+                </p>
+              </div>
+              <button onClick={nextSentence} className="h-12 rounded-xl bg-primary font-black text-primary-foreground">
+                {sIndex + 1 >= sentences.length ? "Ver resultado" : "Próxima frase"}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
       {done && (
         <div className="paper-card flex flex-col gap-4 p-6 text-center">
           <p className="font-display text-3xl font-black">
             {score} de {questions.length} certas
           </p>
+          {sentences.length > 0 && (
+            <p className="font-bold">
+              Frases: {sScore} de {sentences.length} aprovadas
+            </p>
+          )}
           <div className="grid gap-2 sm:grid-cols-2">
             <button onClick={() => start.mutate()} className="h-12 rounded-xl bg-accent font-black text-accent-foreground">
               Gerar novos

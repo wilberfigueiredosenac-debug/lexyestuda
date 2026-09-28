@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedEstudoRouteImport } from './routes/_authenticated/estudo'
 import { Route as AuthenticatedExerciciosRouteImport } from './routes/_authenticated/exercicios'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedRevisaoRouteImport } from './routes/_authenticated/revisao'
@@ -32,6 +33,11 @@ const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedEstudoRoute = AuthenticatedEstudoRouteImport.update({
+  id: '/estudo',
+  path: '/estudo',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedExerciciosRoute = AuthenticatedExerciciosRouteImport.update({
   id: '/exercicios',
@@ -68,6 +74,7 @@ const PalavraTermoRoute = PalavraTermoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/estudo': typeof AuthenticatedEstudoRoute
   '/exercicios': typeof AuthenticatedExerciciosRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/revisao': typeof AuthenticatedRevisaoRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/estudo': typeof AuthenticatedEstudoRoute
   '/exercicios': typeof AuthenticatedExerciciosRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/revisao': typeof AuthenticatedRevisaoRoute
@@ -90,6 +98,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/estudo': typeof AuthenticatedEstudoRoute
   '/_authenticated/exercicios': typeof AuthenticatedExerciciosRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/revisao': typeof AuthenticatedRevisaoRoute
@@ -102,6 +111,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/estudo'
     | '/exercicios'
     | '/perfil'
     | '/revisao'
@@ -112,6 +122,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/estudo'
     | '/exercicios'
     | '/perfil'
     | '/revisao'
@@ -123,6 +134,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/estudo'
     | '/_authenticated/exercicios'
     | '/_authenticated/perfil'
     | '/_authenticated/revisao'
@@ -161,6 +173,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/estudo': {
+      id: '/_authenticated/estudo'
+      path: '/estudo'
+      fullPath: '/estudo'
+      preLoaderRoute: typeof AuthenticatedEstudoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/exercicios': {
       id: '/_authenticated/exercicios'
@@ -208,6 +227,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedEstudoRoute: typeof AuthenticatedEstudoRoute
   AuthenticatedExerciciosRoute: typeof AuthenticatedExerciciosRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedRevisaoRoute: typeof AuthenticatedRevisaoRoute
@@ -215,6 +235,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedEstudoRoute: AuthenticatedEstudoRoute,
   AuthenticatedExerciciosRoute: AuthenticatedExerciciosRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedRevisaoRoute: AuthenticatedRevisaoRoute,

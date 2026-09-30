@@ -279,10 +279,10 @@ function ProfilePage() {
         </div>
         <div>
           <p className="mb-2 text-sm font-black">Acertos e erros por dia</p>
-          <div className="flex h-32 items-end justify-between gap-2">
+          <div className="flex items-end justify-between gap-2">
             {statDays.map((d) => (
               <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
-                <div className="flex w-full max-w-8 flex-1 flex-col justify-end" title={`${d.right} acertos, ${d.wrong} erros`}>
+                <div className="flex h-20 w-full max-w-8 flex-col justify-end" title={`${d.right} acertos, ${d.wrong} erros`}>
                   <div className="w-full rounded-t bg-destructive/70" style={{ height: `${(d.wrong / maxAnswers) * 100}%` }} />
                   <div className="w-full bg-accent" style={{ height: `${(d.right / maxAnswers) * 100}%` }} />
                 </div>
@@ -295,10 +295,10 @@ function ProfilePage() {
         </div>
         <div>
           <p className="mb-2 text-sm font-black">Tempo no estudo diário · total da semana {fmtMs(weekMs)}</p>
-          <div className="flex h-24 items-end justify-between gap-2">
+          <div className="flex items-end justify-between gap-2">
             {statDays.map((d) => (
               <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
-                <div className="flex w-full max-w-8 flex-1 flex-col justify-end">
+                <div className="flex h-20 w-full max-w-8 flex-col justify-end">
                   <div className="w-full rounded-t bg-secondary" style={{ height: `${(d.studyMs / maxMs) * 100}%` }} />
                 </div>
                 <span className="text-xs font-bold">{d.studyMs ? fmtMs(d.studyMs) : "—"}</span>

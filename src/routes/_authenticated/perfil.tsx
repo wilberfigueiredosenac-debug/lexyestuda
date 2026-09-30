@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Flame, Lock, Target, Trophy } from "lucide-react";
+import { BarChart3, Flame, Lock, Target, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { displayName, useAuth } from "@/lib/auth";
@@ -34,7 +34,10 @@ function ProfilePage() {
     queryFn: async () => {
       const since = new Date();
       since.setDate(since.getDate() - 400);
-      const [saved, favorites, reviews, correct, plays, goal, activity] = await Promise.all([
+      const week = new Date();
+      week.setDate(week.getDate() - 6);
+      week.setHours(0, 0, 0, 0);
+      const [saved, favorites, reviews, correct, plays, goal, activity, recent] = await Promise.all([
         supabase.from("vocabulary").select("id", { count: "exact", head: true }),
         supabase.from("vocabulary").select("id", { count: "exact", head: true }).eq("favorite", true),
         supabase.from("reviews").select("id", { count: "exact", head: true }),
@@ -42,6 +45,11 @@ function ProfilePage() {
         supabase.from("pronunciation_plays").select("id", { count: "exact", head: true }),
         supabase.from("study_goals").select("*").maybeSingle(),
         supabase.from("study_activity").select("day, count").gte("day", todayKey(since)),
+        supabase
+          .from("reviews")
+          .select("created_at, correct, duration_ms, source, word_id, term")
+          .gte("created_at", week.toISOString())
+          .limit(2000),
       ]);
       return {
         saved: saved.count ?? 0,
@@ -51,6 +59,7 @@ function ProfilePage() {
         plays: plays.count ?? 0,
         goal: goal.data,
         activity: activity.data ?? [],
+        recent: recent.data ?? [],
       };
     },
   });
@@ -123,6 +132,27 @@ function ProfilePage() {
     return { key, label: d.toLocaleDateString("pt-BR", { weekday: "narrow" }), hit: count >= goalTarget, some: count > 0 };
   });
 
+  const recent = s?.recent ?? [];
+  const remaining = Math.max(0, goalTarget - todayCount);
+  const statDays = week.map((d) => {
+    const rows = recent.filter((r) => todayKey(new Date(r.created_at)) === d.key);
+    const right = rows.filter((r) => r.correct).length;
+    const studyMs = rows
+      .filter((r) => r.source === "estudo")
+      .reduce((a, r) => a + (r.duration_ms ?? 0), 0);
+    return { ...d, right, wrong: rows.length - right, studyMs };
+  });
+  const maxAnswers = Math.max(1, ...statDays.map((d) => d.right + d.wrong));
+  const maxMs = Math.max(1, ...statDays.map((d) => d.studyMs));
+  const reviewedWeek = new Set(recent.map((r) => r.word_id ?? r.term)).size;
+  const timedRows = recent.filter((r) => r.source === "estudo" && r.duration_ms != null);
+  const weekMs = timedRows.reduce((a, r) => a + (r.duration_ms ?? 0), 0);
+  const avgMs = timedRows.length ? weekMs / timedRows.length : 0;
+  const fmtMs = (ms: number) => {
+    const sec = Math.round(ms / 1000);
+    return sec < 60 ? `${sec}s` : `${Math.floor(sec / 60)}min${sec % 60 ? ` ${sec % 60}s` : ""}`;
+  };
+
   const cards = [
     { label: "Palavras salvas", value: s?.saved ?? 0 },
     { label: "Favoritas", value: s?.favorites ?? 0 },
@@ -158,6 +188,11 @@ function ProfilePage() {
             <p className="text-xs font-bold uppercase text-muted-foreground">Meta de hoje</p>
           </div>
         </div>
+        <p data-testid="goal-remaining" className="font-bold">
+          {remaining === 0
+            ? "Meta de hoje cumprida! 🎉"
+            : `Faltam ${remaining} ${remaining === 1 ? "atividade" : "atividades"} para a meta de hoje.`}
+        </p>
         <div className="h-3 overflow-hidden rounded-full bg-muted">
           <div className="h-full bg-accent transition-all" style={{ width: `${progress}%` }} />
         </div>
@@ -222,6 +257,56 @@ function ProfilePage() {
         >
           Salvar meta
         </button>
+      </section>
+
+      <section className="paper-card flex flex-col gap-5 p-5">
+        <h2 className="flex items-center gap-2 font-display text-xl font-black">
+          <BarChart3 className="h-5 w-5 text-accent" aria-hidden /> Estatísticas
+        </h2>
+        <div className="grid grid-cols-3 gap-3 text-center">
+          <div>
+            <p className="font-display text-3xl font-black text-accent">{s?.reviews ?? 0}</p>
+            <p className="text-xs font-bold uppercase text-muted-foreground">Palavras revisadas</p>
+          </div>
+          <div>
+            <p className="font-display text-3xl font-black text-accent">{reviewedWeek}</p>
+            <p className="text-xs font-bold uppercase text-muted-foreground">Nos últimos 7 dias</p>
+          </div>
+          <div>
+            <p className="font-display text-3xl font-black text-accent">{fmtMs(avgMs)}</p>
+            <p className="text-xs font-bold uppercase text-muted-foreground">Média por palavra</p>
+          </div>
+        </div>
+        <div>
+          <p className="mb-2 text-sm font-black">Acertos e erros por dia</p>
+          <div className="flex items-end justify-between gap-2">
+            {statDays.map((d) => (
+              <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
+                <div className="flex h-20 w-full max-w-8 flex-col justify-end" title={`${d.right} acertos, ${d.wrong} erros`}>
+                  <div className="w-full rounded-t bg-destructive/70" style={{ height: `${Math.round((d.wrong / maxAnswers) * 80)}px` }} />
+                  <div className="w-full bg-accent" style={{ height: `${Math.round((d.right / maxAnswers) * 80)}px` }} />
+                </div>
+                <span className="text-xs font-bold">{d.right}/{d.right + d.wrong}</span>
+                <span className="text-xs font-bold uppercase text-muted-foreground">{d.label}</span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">Verde = acertos · vermelho = erros</p>
+        </div>
+        <div>
+          <p className="mb-2 text-sm font-black">Tempo no estudo diário · total da semana {fmtMs(weekMs)}</p>
+          <div className="flex items-end justify-between gap-2">
+            {statDays.map((d) => (
+              <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
+                <div className="flex h-20 w-full max-w-8 flex-col justify-end">
+                  <div className="w-full rounded-t bg-secondary" style={{ height: `${Math.round((d.studyMs / maxMs) * 80)}px` }} />
+                </div>
+                <span className="text-xs font-bold">{d.studyMs ? fmtMs(d.studyMs) : "—"}</span>
+                <span className="text-xs font-bold uppercase text-muted-foreground">{d.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section className="flex flex-col gap-3">

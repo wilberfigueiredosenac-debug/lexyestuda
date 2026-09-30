@@ -255,9 +255,10 @@ export const checkSentence = createServerFn({ method: "POST" })
       const result = streamText({
         model: aiModel(),
         system: `Você é o LEXY, professor de Língua Portuguesa, gentil e encorajador. Corrija a frase escrita por um estudante em português do Brasil.
-correct = true quando a frase usa a palavra-alvo com o sentido adequado e atende ao pedido (pequenos deslizes de digitação não reprovam).
-feedback: 1 ou 2 frases curtas e simples explicando o acerto ou o que melhorar.
-improved: uma versão corrigida/melhorada da frase do aluno.`,
+correct = true SOMENTE quando a frase usa a palavra-alvo com o sentido pedido E o contexto da frase deixa esse sentido claro (quem lê entende o que a palavra significa). Pequenos deslizes de digitação não reprovam.
+correct = false quando a palavra só aparece solta, sem que a frase mostre o significado (ex.: "Eu gosto de saudade."), quando o sentido está errado ou quando não atende ao pedido.
+feedback: 1 ou 2 frases curtas e simples explicando o acerto ou exatamente o que falta para mostrar o sentido.
+improved: uma versão corrigida/melhorada da frase do aluno que deixe o sentido claro.`,
         prompt: `Palavra-alvo: ${data.term}\nPedido: ${data.prompt}\nFrase do aluno: """${data.answer}"""`,
         output: Output.object({ schema: sentenceCheckSchema }),
         providerOptions: reasoningOptions,
@@ -268,6 +269,16 @@ improved: uma versão corrigida/melhorada da frase do aluno.`,
       throw new Error("Não foi possível corrigir a frase agora. Tente novamente.");
     }
   });
+
+function shuffleOptions<T extends { options: string[]; correctIndex: number }>(q: T): T {
+  const right = q.options[q.correctIndex]!;
+  const opts = [...q.options];
+  for (let i = opts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [opts[i], opts[j]] = [opts[j]!, opts[i]!];
+  }
+  return { ...q, options: opts, correctIndex: opts.indexOf(right) };
+}
 
 export const generateCustomExercises = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -288,23 +299,52 @@ export const generateCustomExercises = createServerFn({ method: "POST" })
           data.level === "medio" ? "Médio" : "Fundamental"
         }.
 O aluno pode enviar uma palavra, um texto ou um tema:
-- Palavra: explore significado, sinônimos, antônimos, polissemia e uso em frases.
-- Texto: escolha palavras importantes do texto e pergunte o sentido delas no contexto.
-- Tema: selecione vocabulário relevante sobre o tema.
-Varie os tipos (type): "significado", "sinônimo", "antônimo", "contexto", "completar frase", "polissemia".
-Cada pergunta tem exatamente 4 alternativas diferentes, apenas uma correta; correctIndex é o índice (0 a 3) da correta; term é a palavra trabalhada; explanation é uma frase curta explicando a resposta.
-Além disso, crie de 2 a 3 "sentences": desafios de escrita em que o aluno escreve uma frase própria usando uma palavra (term). prompt é o pedido claro (ex.: "Escreva uma frase usando 'saudade' para falar de uma viagem."); sampleAnswer é um exemplo de boa resposta.`,
+- Palavra: explore a palavra por vários ângulos (significado, sinônimos, antônimos, polissemia, uso) e palavras da mesma família.
+- Texto: escolha as palavras mais importantes ou difíceis do texto e pergunte o sentido delas NAQUELE contexto.
+- Tema: escolha vocabulário variado e relevante do tema (substantivos, adjetivos e verbos), uma palavra diferente por pergunta sempre que possível.
+
+PERGUNTAS DE MÚLTIPLA ESCOLHA
+Use estes tipos (campo type) e VARIE: nunca repita o mesmo tipo em duas perguntas seguidas e use pelo menos 4 tipos diferentes quando houver 5 ou mais perguntas:
+- "significado": o que a palavra quer dizer.
+- "sinônimo": qual palavra tem sentido parecido.
+- "antônimo": qual palavra tem sentido oposto.
+- "contexto": uma frase com a palavra; qual o sentido dela ali.
+- "completar frase": frase com lacuna (___); qual palavra completa com sentido.
+- "polissemia": em qual frase a palavra tem um sentido diferente dos outros.
+- "uso correto": qual das 4 frases usa a palavra corretamente.
+- "intruso": qual palavra não pertence ao mesmo campo de sentido.
+Regras das alternativas: exatamente 4, todas diferentes, da mesma classe gramatical e de tamanho parecido; as erradas devem ser plausíveis (confusões comuns de estudantes), nunca absurdas ou engraçadas; não use "todas as anteriores" nem "nenhuma das anteriores". Não repita a mesma pergunta. correctIndex é o índice (0 a 3) da correta; term é a palavra trabalhada; explanation é uma frase curta explicando por que a resposta está certa.
+
+FRASES PARA ESCREVER (sentences)
+Crie de 2 a 3 desafios em que o aluno escreve uma frase própria que PROVE que entendeu o significado de term. O prompt deve dar uma situação concreta e exigir que o sentido fique claro pelo contexto, por exemplo: "Escreva uma frase sobre um fim de semana em que fique claro que 'efêmero' significa algo que dura pouco." Evite pedidos vagos como "Escreva uma frase com a palavra X". sampleAnswer é um exemplo de boa resposta em que o sentido fica evidente.
+
+words: lista com as palavras trabalhadas (em minúsculas, sem repetição).`,
         prompt: `Crie exatamente ${data.count} exercícios de múltipla escolha e de 2 a 3 frases para responder a partir de:\n"""\n${data.source}\n"""`,
-        output: Output.object({ schema: customQuizSchema }),
+        output: Output.object({ schema: customQuizSchema.extend({ words: z.array(z.string()) }) }),
         providerOptions: reasoningOptions,
       });
       const quiz = await result.output;
+      const seen = new Set<string>();
       const questions = quiz.questions
         .filter((q) => q.options.length >= 2 && q.correctIndex >= 0 && q.correctIndex < q.options.length)
+        .filter((q) => {
+          const key = q.question.trim().toLowerCase();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        })
+        .map(shuffleOptions)
         .slice(0, data.count);
       const sentences = quiz.sentences.filter((s) => s.prompt.trim()).slice(0, 3);
       if (questions.length === 0) throw new Error("empty");
-      return { questions, sentences };
+      const words = Array.from(
+        new Set(
+          [...quiz.words, ...questions.map((q) => q.term), ...sentences.map((s) => s.term)]
+            .map((w) => w.trim().toLowerCase())
+            .filter((w) => w && w.length <= 40),
+        ),
+      );
+      return { questions, sentences, words };
     } catch (error) {
       console.error("[lexy] generateCustomExercises", error);
       throw new Error("Não foi possível criar os exercícios agora. Tente novamente.");

@@ -72,8 +72,10 @@ export type Database = {
           answer: string
           correct: boolean
           created_at: string
+          duration_ms: number | null
           id: string
           question: string
+          source: string
           term: string
           user_id: string
           word_id: string | null
@@ -82,8 +84,10 @@ export type Database = {
           answer?: string
           correct?: boolean
           created_at?: string
+          duration_ms?: number | null
           id?: string
           question: string
+          source?: string
           term: string
           user_id: string
           word_id?: string | null
@@ -92,8 +96,10 @@ export type Database = {
           answer?: string
           correct?: boolean
           created_at?: string
+          duration_ms?: number | null
           id?: string
           question?: string
+          source?: string
           term?: string
           user_id?: string
           word_id?: string | null

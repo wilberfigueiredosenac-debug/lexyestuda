@@ -1,0 +1,2 @@
+ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS duration_ms integer, ADD COLUMN IF NOT EXISTS source text NOT NULL DEFAULT 'revisao';
+CREATE INDEX IF NOT EXISTS reviews_user_created_idx ON public.reviews (user_id, created_at DESC);

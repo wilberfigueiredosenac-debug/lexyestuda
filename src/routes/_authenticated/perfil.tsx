@@ -283,8 +283,8 @@ function ProfilePage() {
             {statDays.map((d) => (
               <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
                 <div className="flex h-20 w-full max-w-8 flex-col justify-end" title={`${d.right} acertos, ${d.wrong} erros`}>
-                  <div className="w-full rounded-t bg-destructive/70" style={{ height: `${(d.wrong / maxAnswers) * 100}%` }} />
-                  <div className="w-full bg-accent" style={{ height: `${(d.right / maxAnswers) * 100}%` }} />
+                  <div className="w-full rounded-t bg-destructive/70" style={{ height: `${Math.round((d.wrong / maxAnswers) * 80)}px` }} />
+                  <div className="w-full bg-accent" style={{ height: `${Math.round((d.right / maxAnswers) * 80)}px` }} />
                 </div>
                 <span className="text-xs font-bold">{d.right}/{d.right + d.wrong}</span>
                 <span className="text-xs font-bold uppercase text-muted-foreground">{d.label}</span>
@@ -299,7 +299,7 @@ function ProfilePage() {
             {statDays.map((d) => (
               <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
                 <div className="flex h-20 w-full max-w-8 flex-col justify-end">
-                  <div className="w-full rounded-t bg-secondary" style={{ height: `${(d.studyMs / maxMs) * 100}%` }} />
+                  <div className="w-full rounded-t bg-secondary" style={{ height: `${Math.round((d.studyMs / maxMs) * 80)}px` }} />
                 </div>
                 <span className="text-xs font-bold">{d.studyMs ? fmtMs(d.studyMs) : "—"}</span>
                 <span className="text-xs font-bold uppercase text-muted-foreground">{d.label}</span>

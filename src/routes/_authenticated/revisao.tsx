@@ -113,6 +113,9 @@ function ReviewPage() {
           <Link to="/exercicios" className="text-center text-sm font-bold underline">
             Prefere escolher uma palavra, texto ou tema? Crie exercícios personalizados
           </Link>
+          <Link to="/tema" className="text-center text-sm font-bold underline">
+            Ou escolha um tema e pratique sem pesquisar palavra a palavra
+          </Link>
         </div>
       )}
 

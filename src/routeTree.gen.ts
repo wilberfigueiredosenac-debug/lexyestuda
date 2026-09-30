@@ -16,6 +16,7 @@ import { Route as AuthenticatedEstudoRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedExerciciosRouteImport } from './routes/_authenticated/exercicios'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedRevisaoRouteImport } from './routes/_authenticated/revisao'
+import { Route as AuthenticatedTemaRouteImport } from './routes/_authenticated/tema'
 import { Route as AuthenticatedVocabularioRouteImport } from './routes/_authenticated/vocabulario'
 import { Route as ApiPronunciaRouteImport } from './routes/api/pronuncia'
 import { Route as PalavraTermoRouteImport } from './routes/palavra.$termo'
@@ -54,6 +55,11 @@ const AuthenticatedRevisaoRoute = AuthenticatedRevisaoRouteImport.update({
   path: '/revisao',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTemaRoute = AuthenticatedTemaRouteImport.update({
+  id: '/tema',
+  path: '/tema',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedVocabularioRoute =
   AuthenticatedVocabularioRouteImport.update({
     id: '/vocabulario',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/exercicios': typeof AuthenticatedExerciciosRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/revisao': typeof AuthenticatedRevisaoRoute
+  '/tema': typeof AuthenticatedTemaRoute
   '/vocabulario': typeof AuthenticatedVocabularioRoute
   '/api/pronuncia': typeof ApiPronunciaRoute
   '/palavra/$termo': typeof PalavraTermoRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/exercicios': typeof AuthenticatedExerciciosRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/revisao': typeof AuthenticatedRevisaoRoute
+  '/tema': typeof AuthenticatedTemaRoute
   '/vocabulario': typeof AuthenticatedVocabularioRoute
   '/api/pronuncia': typeof ApiPronunciaRoute
   '/palavra/$termo': typeof PalavraTermoRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/_authenticated/exercicios': typeof AuthenticatedExerciciosRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/revisao': typeof AuthenticatedRevisaoRoute
+  '/_authenticated/tema': typeof AuthenticatedTemaRoute
   '/_authenticated/vocabulario': typeof AuthenticatedVocabularioRoute
   '/api/pronuncia': typeof ApiPronunciaRoute
   '/palavra/$termo': typeof PalavraTermoRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/exercicios'
     | '/perfil'
     | '/revisao'
+    | '/tema'
     | '/vocabulario'
     | '/api/pronuncia'
     | '/palavra/$termo'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/exercicios'
     | '/perfil'
     | '/revisao'
+    | '/tema'
     | '/vocabulario'
     | '/api/pronuncia'
     | '/palavra/$termo'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/_authenticated/exercicios'
     | '/_authenticated/perfil'
     | '/_authenticated/revisao'
+    | '/_authenticated/tema'
     | '/_authenticated/vocabulario'
     | '/api/pronuncia'
     | '/palavra/$termo'
@@ -202,6 +214,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRevisaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/tema': {
+      id: '/_authenticated/tema'
+      path: '/tema'
+      fullPath: '/tema'
+      preLoaderRoute: typeof AuthenticatedTemaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/vocabulario': {
       id: '/_authenticated/vocabulario'
       path: '/vocabulario'
@@ -231,6 +250,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedExerciciosRoute: typeof AuthenticatedExerciciosRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedRevisaoRoute: typeof AuthenticatedRevisaoRoute
+  AuthenticatedTemaRoute: typeof AuthenticatedTemaRoute
   AuthenticatedVocabularioRoute: typeof AuthenticatedVocabularioRoute
 }
 
@@ -239,6 +259,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedExerciciosRoute: AuthenticatedExerciciosRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedRevisaoRoute: AuthenticatedRevisaoRoute,
+  AuthenticatedTemaRoute: AuthenticatedTemaRoute,
   AuthenticatedVocabularioRoute: AuthenticatedVocabularioRoute,
 }
 

@@ -3,6 +3,7 @@ import { BookMarked, CalendarCheck, Home, Sparkles, User, Wand2 } from "lucide-r
 import { StudyReminder } from "@/components/StudyReminder";
 import type { ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
+import logo from "@/assets/lexy-logo.png.asset.json";
 
 const navItems = [
   { to: "/", label: "Início", icon: Home },
@@ -20,11 +21,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-20 border-b-2 border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3 px-4 py-3">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-secondary text-lg font-black text-secondary-foreground">
-              L
-            </span>
-            <span className="font-display text-2xl font-black tracking-tight">LEXY</span>
+          <Link to="/" className="flex items-center" aria-label="LEXY — início">
+            <img src={logo.url} alt="LEXY" className="h-12 w-auto" />
           </Link>
           {!loading &&
             (user ? (

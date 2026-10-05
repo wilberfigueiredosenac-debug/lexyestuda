@@ -20,9 +20,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-20 border-b-2 border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3 px-4 py-3">
-          <Link to="/" className="flex items-center" aria-label="LEXY — início">
-            <img src={logo.url} alt="LEXY" className="h-12 w-auto" />
+        <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3 px-4 py-1.5">
+          <Link to="/" className="relative z-30 flex items-end" aria-label="LEXY — início">
+            <img src={logo.url} alt="LEXY" className="-mb-6 h-20 w-auto sm:-mb-8 sm:h-24" />
           </Link>
           {!loading &&
             (user ? (

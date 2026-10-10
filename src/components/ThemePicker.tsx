@@ -16,7 +16,7 @@ const themes = [
 export type LexyTheme = (typeof themes)[number]["id"];
 
 function applyTheme(theme: LexyTheme) {
-  document.documentElement.dataset.theme = theme;
+  document.documentElement.dataset["theme"] = theme;
   document.documentElement.style.colorScheme = theme === "dark" ? "dark" : "light";
 }
 

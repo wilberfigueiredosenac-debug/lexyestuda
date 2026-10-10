@@ -4,6 +4,7 @@ import { StudyReminder } from "@/components/StudyReminder";
 import type { ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
 import logo from "@/assets/lexy-logo.png.asset.json";
+import { ThemePicker } from "@/components/ThemePicker";
 
 const navItems = [
   { to: "/", label: "Início", icon: Home },
@@ -19,16 +20,18 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-20 border-b-2 border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3 px-4 py-1.5">
+      <header className="sticky top-0 z-20 border-b-2 border-border bg-background/95 shadow-sm backdrop-blur">
+        <div className="mx-auto flex h-20 w-full max-w-4xl items-center justify-between gap-3 px-4">
           <Link to="/" className="relative z-30 flex items-end" aria-label="LEXY — início">
-            <img src={logo.url} alt="LEXY" className="-mb-6 h-20 w-auto sm:-mb-8 sm:h-24" />
+            <img src={logo.url} alt="LEXY" className="-mb-7 h-24 w-auto object-contain sm:-mb-9 sm:h-28" />
           </Link>
-          {!loading &&
-            (user ? (
+          <div className="flex items-center gap-2">
+            <ThemePicker compact />
+            {!loading &&
+              (user ? (
               <Link
                 to="/perfil"
-                className="rounded-full border-2 border-border px-4 py-1.5 text-sm font-bold hover:bg-muted"
+                className="rounded-full border-2 border-border bg-card px-4 py-1.5 text-sm font-bold transition hover:-translate-y-0.5 hover:bg-muted"
               >
                 Minha conta
               </Link>
@@ -39,7 +42,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               >
                 Entrar
               </Link>
-            ))}
+              ))}
+          </div>
         </div>
       </header>
 
@@ -54,7 +58,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link
               key={to}
               to={to}
-              className="flex flex-1 flex-col items-center gap-1 py-3 text-xs font-bold text-muted-foreground transition-colors"
+              className="flex flex-1 flex-col items-center gap-1 py-3 text-xs font-bold text-muted-foreground transition duration-200 hover:-translate-y-0.5 hover:text-foreground"
               activeProps={{ className: "text-accent" }}
               activeOptions={{ exact: to === "/" }}
             >

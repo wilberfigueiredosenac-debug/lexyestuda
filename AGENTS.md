@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep visual themes token-driven through the root `data-theme` attribute so every screen changes color consistently without duplicating styles.

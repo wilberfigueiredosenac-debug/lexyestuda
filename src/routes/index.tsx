@@ -4,6 +4,7 @@ import { BookMarked, Sparkles } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import logo from "@/assets/lexy-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,9 +47,10 @@ function Index() {
   });
 
   return (
-    <div className="flex flex-col gap-10 py-6">
+    <div className="content-enter flex flex-col gap-10 py-6">
       <section className="text-center">
-        <h1 className="font-display text-6xl font-black tracking-tight sm:text-7xl">LEXY</h1>
+        <h1 className="sr-only">LEXY</h1>
+        <img src={logo.url} alt="" aria-hidden className="mx-auto h-28 w-auto object-contain sm:h-36" />
         <p className="mt-2 text-lg text-muted-foreground">Seu vocabulário, do seu jeito.</p>
       </section>
 
@@ -65,7 +67,7 @@ function Index() {
                 key={row.term}
                 to="/palavra/$termo"
                 params={{ termo: row.term }}
-                className="rounded-full border-2 border-border bg-card px-4 py-1.5 text-sm font-bold hover:bg-muted"
+              className="rounded-full border-2 border-border bg-card px-4 py-1.5 text-sm font-bold transition hover:-translate-y-0.5 hover:bg-muted"
               >
                 {row.term}
               </Link>
@@ -75,7 +77,7 @@ function Index() {
       )}
 
       <section className="grid gap-4 sm:grid-cols-2">
-        <Link to="/vocabulario" className="paper-card flex items-start gap-3 p-5 hover:bg-muted">
+        <Link to="/vocabulario" className="paper-card interactive-card flex items-start gap-3 p-5 hover:bg-muted">
           <BookMarked className="mt-1 h-6 w-6 text-accent" aria-hidden />
           <span>
             <span className="block font-display text-xl font-black">Meu vocabulário</span>
@@ -84,7 +86,7 @@ function Index() {
             </span>
           </span>
         </Link>
-        <Link to="/revisao" className="paper-card flex items-start gap-3 p-5 hover:bg-muted">
+        <Link to="/revisao" className="paper-card interactive-card flex items-start gap-3 p-5 hover:bg-muted">
           <Sparkles className="mt-1 h-6 w-6 text-accent" aria-hidden />
           <span>
             <span className="block font-display text-xl font-black">Revisão</span>

@@ -118,6 +118,11 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('lexy-theme')||'original';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t==='dark'?'dark':'light'}catch(e){}})()`,
+          }}
+        />
         <HeadContent />
       </head>
       <body>

@@ -1,11 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { BarChart3, Flame, Lock, Target, Trophy } from "lucide-react";
+import { BarChart3, Flame, Lock, Palette, Target, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { displayName, useAuth } from "@/lib/auth";
 import { bestStreak, computeAchievements, computeStreak, todayKey } from "@/lib/study";
+import { ThemePicker } from "@/components/ThemePicker";
+import { StudyGoalCalculator } from "@/components/StudyGoalCalculator";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({
@@ -163,7 +166,7 @@ function ProfilePage() {
   ];
 
   return (
-    <div className="flex flex-col gap-6 py-2">
+    <div className="content-enter flex flex-col gap-6 py-2">
       <header>
         <h1 className="font-display text-4xl font-black uppercase">Perfil</h1>
         <p className="mt-1 text-lg font-bold">{displayName(user)}</p>
@@ -216,6 +219,18 @@ function ProfilePage() {
       </section>
 
       <section className="paper-card flex flex-col gap-4 p-5">
+        <div>
+          <h2 className="flex items-center gap-2 font-display text-xl font-black">
+            <Palette className="h-5 w-5 text-accent" aria-hidden /> Aparência
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">Escolha as cores que deixam o estudo mais confortável.</p>
+        </div>
+        <ThemePicker />
+      </section>
+
+      <StudyGoalCalculator onUseGoal={setTarget} />
+
+      <section className="paper-card flex flex-col gap-4 p-5">
         <h2 className="flex items-center gap-2 font-display text-xl font-black">
           <Target className="h-5 w-5 text-accent" aria-hidden /> Meta diária e lembrete
         </h2>
@@ -250,13 +265,13 @@ function ProfilePage() {
             />
           </label>
         )}
-        <button
+        <Button
           onClick={() => saveGoal.mutate()}
           disabled={saveGoal.isPending}
-          className="h-12 rounded-xl bg-primary font-black text-primary-foreground disabled:opacity-60"
+          className="h-12 rounded-xl font-black"
         >
           Salvar meta
-        </button>
+        </Button>
       </section>
 
       <section className="paper-card flex flex-col gap-5 p-5">
@@ -315,7 +330,7 @@ function ProfilePage() {
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {achievements.map((a) => (
-            <div key={a.id} className={`paper-card flex flex-col gap-1 p-4 ${a.unlocked ? "" : "opacity-50"}`}>
+            <div key={a.id} className={`paper-card interactive-card flex flex-col gap-1 p-4 ${a.unlocked ? "" : "opacity-50"}`}>
               {a.unlocked ? (
                 <Trophy className="h-6 w-6 text-secondary" aria-hidden />
               ) : (
@@ -330,16 +345,16 @@ function ProfilePage() {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {cards.map((card) => (
-          <div key={card.label} className="paper-card p-5 text-center">
+          <div key={card.label} className="paper-card interactive-card p-5 text-center">
             <p className="font-display text-4xl font-black text-accent">{card.value}</p>
             <p className="mt-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">{card.label}</p>
           </div>
         ))}
       </div>
 
-      <button onClick={signOut} className="h-12 rounded-xl border-2 border-border bg-card font-bold hover:bg-muted">
+      <Button onClick={signOut} variant="outline" className="h-12 rounded-xl border-2 font-bold">
         Sair da conta
-      </button>
+      </Button>
     </div>
   );
 }

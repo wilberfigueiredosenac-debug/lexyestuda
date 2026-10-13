@@ -87,9 +87,8 @@ export const lookupWord = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ term: z.string().min(1).max(60) }).parse(input))
   .handler(async ({ data }) => {
     const term = normalize(data.term);
-    const supabase = publicClient();
-
-    const existing = await supabase.from("words").select("*").eq("term", term).maybeSingle();
+    const { supabaseAdmin: reader } = await import("@/integrations/supabase/client.server");
+    const existing = await reader.from("words").select("*").eq("term", term).maybeSingle();
     if (existing.data) return { word: existing.data, notFound: false as const };
 
     let analysis: z.infer<typeof analysisSchema>;

@@ -20,9 +20,12 @@ export function PronounceButton({ term, wordId }: { term: string; wordId?: strin
     try {
       let url = cache.get(term);
       if (!url) {
+        const { data: sess } = await supabase.auth.getSession();
+        const token = sess.session?.access_token;
+        if (!token) throw new Error("Entre na sua conta para ouvir a pronúncia.");
         const res = await fetch("/api/pronuncia", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({ text: term }),
         });
         if (!res.ok) throw new Error((await res.text()) || "Não foi possível gerar o áudio.");

@@ -7,8 +7,18 @@ export const Route = createFileRoute("/api/pronuncia")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const token = /^Bearer (.+)$/.exec(request.headers.get("authorization") ?? "")?.[1];
+        if (!token) return new Response("Entre na sua conta para ouvir a pronúncia.", { status: 401 });
+        const { createClient } = await import("@supabase/supabase-js");
+        const sb = createClient(process.env["SUPABASE_URL"]!, process.env["SUPABASE_PUBLISHABLE_KEY"]!, {
+          auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
+        });
+        const { data: userData, error: authError } = await sb.auth.getUser(token);
+        if (authError || !userData.user) return new Response("Sessão inválida.", { status: 401 });
+
         const parsed = Body.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return new Response("Palavra inválida", { status: 400 });
+        if (!/^[\p{L}\s'-]+$/u.test(parsed.data.text)) return new Response("Palavra inválida", { status: 400 });
         const key = process.env["LOVABLE_API_KEY"];
         if (!key) return new Response("Áudio não configurado", { status: 500 });
 

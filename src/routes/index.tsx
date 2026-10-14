@@ -4,7 +4,7 @@ import { BookMarked, Sparkles } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/lexy-logo.png.asset.json";
+import logo from "@/assets/lexy-book-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -50,7 +50,7 @@ function Index() {
     <div className="content-enter flex flex-col gap-10 py-6">
       <section className="text-center">
         <h1 className="sr-only">LEXY</h1>
-        <img src={logo.url} alt="" aria-hidden className="mx-auto h-28 w-auto object-contain sm:h-36" />
+        <img src={logo.url} alt="" aria-hidden className="mx-auto h-36 w-auto object-contain sm:h-44" />
         <p className="mt-2 text-lg text-muted-foreground">Seu vocabulário, do seu jeito.</p>
       </section>
 

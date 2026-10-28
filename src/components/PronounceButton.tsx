@@ -12,6 +12,7 @@ export function PronounceButton({ term, wordId }: { term: string; wordId?: strin
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
+  const [slow, setSlow] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   async function play() {
@@ -34,6 +35,7 @@ export function PronounceButton({ term, wordId }: { term: string; wordId?: strin
       }
       audioRef.current?.pause();
       const audio = new Audio(url);
+      audio.playbackRate = slow ? 0.75 : 1;
       audioRef.current = audio;
       await audio.play();
       if (user) {
@@ -50,6 +52,7 @@ export function PronounceButton({ term, wordId }: { term: string; wordId?: strin
   }
 
   return (
+    <span className="inline-flex items-center gap-1">
     <button
       type="button"
       onClick={play}
@@ -63,5 +66,15 @@ export function PronounceButton({ term, wordId }: { term: string; wordId?: strin
       )}
       Ouvir
     </button>
+    <button
+      type="button"
+      onClick={() => setSlow((v) => !v)}
+      aria-pressed={slow}
+      aria-label="Alternar velocidade da pronúncia"
+      className={`rounded-full border-2 px-2.5 py-1.5 text-xs font-black ${slow ? "border-accent text-accent" : "border-border text-muted-foreground"} hover:bg-muted`}
+    >
+      {slow ? "0.75x" : "1x"}
+    </button>
+    </span>
   );
 }

@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { BookMarked, Sparkles } from "lucide-react";
+import { BookMarked, Gamepad2, PenLine, Route as RouteIcon, Sparkles, Star, Target } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { getWordOfDay, lookupWord } from "@/lib/lexy.functions";
+import { PronounceButton } from "@/components/PronounceButton";
 import { SearchBar } from "@/components/SearchBar";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,6 +59,8 @@ function Index() {
 
       <SearchBar />
 
+      <WordOfDay />
+
       {user && (recent.data?.length ?? 0) > 0 && (
         <section>
           <h2 className="mb-3 text-sm font-black uppercase tracking-wide text-muted-foreground">
@@ -97,6 +102,21 @@ function Index() {
         </Link>
       </section>
 
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { to: "/jogos", icon: Gamepad2, title: "Caça ao Intruso", text: "Jogo rápido de sinônimos." },
+          { to: "/trilhas", icon: RouteIcon, title: "Trilhas", text: "Coleções prontas de palavras." },
+          { to: "/redacao", icon: PenLine, title: "Redação", text: "Melhore o vocabulário do seu texto." },
+          { to: "/reforco", icon: Target, title: "Precisa de atenção", text: "Palavras em que você errou." },
+        ].map(({ to, icon: Icon, title, text }) => (
+          <Link key={to} to={to} className="paper-card interactive-card flex flex-col gap-1 p-4 hover:bg-muted">
+            <Icon className="h-6 w-6 text-accent" aria-hidden />
+            <span className="font-display text-lg font-black">{title}</span>
+            <span className="text-sm text-muted-foreground">{text}</span>
+          </Link>
+        ))}
+      </section>
+
       {!user && (
         <p className="text-center text-sm text-muted-foreground">
           <Link to="/auth" className="font-bold underline">
@@ -106,5 +126,38 @@ function Index() {
         </p>
       )}
     </div>
+  );
+}
+
+function WordOfDay() {
+  const getDay = useServerFn(getWordOfDay);
+  const lookup = useServerFn(lookupWord);
+  const day = useQuery({ queryKey: ["word-of-day"], queryFn: () => getDay(), staleTime: 3_600_000 });
+  const term = day.data?.term;
+  const word = useQuery({
+    queryKey: ["word", term],
+    enabled: !!term,
+    queryFn: () => lookup({ data: { term: term! } }),
+    staleTime: Infinity,
+  });
+  if (!term) return null;
+  const w = word.data?.word;
+  return (
+    <section className="paper-card interactive-card flex flex-col gap-3 p-5">
+      <p className="flex items-center gap-2 text-sm font-black uppercase tracking-wide text-accent">
+        <Star className="h-4 w-4" aria-hidden /> Palavra do dia
+      </p>
+      <div className="flex flex-wrap items-center gap-3">
+        <Link to="/palavra/$termo" params={{ termo: term }} className="font-display text-3xl font-black hover:underline">
+          {w?.display_term ?? term}
+        </Link>
+        {w?.word_class && <span className="text-sm italic text-muted-foreground">{w.word_class}</span>}
+        <PronounceButton term={term} wordId={w?.id ?? null} />
+      </div>
+      {w ? <p>{w.meaning}</p> : <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />}
+      <Link to="/palavra/$termo" params={{ termo: term }} className="self-start text-sm font-bold underline">
+        Ver tudo e salvar no vocabulário
+      </Link>
+    </section>
   );
 }

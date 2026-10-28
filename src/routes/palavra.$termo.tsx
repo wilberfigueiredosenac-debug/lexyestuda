@@ -88,9 +88,20 @@ function WordPage() {
       <SearchBar initialTerm={term} />
 
       {query.isPending && (
-        <div className="paper-card flex items-center gap-3 p-6">
-          <Loader2 className="h-5 w-5 animate-spin text-accent" aria-hidden />
-          <p className="font-bold">Analisando “{term}”...</p>
+        <div className="paper-card flex flex-col gap-4 p-6" aria-busy>
+          <div className="flex items-center gap-3">
+            <Loader2 className="h-5 w-5 animate-spin text-accent" aria-hidden />
+            <p className="font-display text-2xl font-black">{term}</p>
+          </div>
+          <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+          <div className="h-4 w-full animate-pulse rounded bg-muted" />
+          <div className="h-4 w-5/6 animate-pulse rounded bg-muted" />
+          <div className="mt-2 flex gap-2">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-7 w-20 animate-pulse rounded-full bg-muted" />
+            ))}
+          </div>
+          <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
         </div>
       )}
 

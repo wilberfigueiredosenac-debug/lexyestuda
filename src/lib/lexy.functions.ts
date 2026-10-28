@@ -54,6 +54,11 @@ const reasoningOptions = {
   },
 } as const;
 
+// Pesquisa de dicionário: resposta direta, sem raciocínio forçado, para ficar rápida.
+const fastOptions = {
+  openai: { reasoningEffort: "none", store: false },
+} as const;
+
 const analysisSchema = z.object({
   exists: z.boolean(),
   displayTerm: z.string(),
@@ -98,7 +103,7 @@ export const lookupWord = createServerFn({ method: "POST" })
         system: SYSTEM_PROMPT,
         prompt: `Analise a palavra: "${term}"`,
         output: Output.object({ schema: analysisSchema }),
-        providerOptions: reasoningOptions,
+        providerOptions: fastOptions,
       });
       analysis = await result.output;
     } catch (error) {
@@ -347,5 +352,85 @@ words: lista com as palavras trabalhadas (em minúsculas, sem repetição).`,
     } catch (error) {
       console.error("[lexy] generateCustomExercises", error);
       throw new Error("Não foi possível criar os exercícios agora. Tente novamente.");
+    }
+  });
+
+// ---------- Pesquisa rápida, Palavra do Dia, jogos e redação ----------
+
+export const suggestWords = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => z.object({ prefix: z.string().min(1).max(40) }).parse(input))
+  .handler(async ({ data }) => {
+    const prefix = normalize(data.prefix).replace(/[%_,()]/g, "");
+    if (!prefix) return { terms: [] as string[] };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows } = await supabaseAdmin
+      .from("words")
+      .select("term")
+      .ilike("term", `${prefix}%`)
+      .order("term")
+      .limit(6);
+    return { terms: (rows ?? []).map((r) => r.term) };
+  });
+
+const DAILY_WORDS = [
+  "efêmero", "resiliência", "altruísmo", "paradigma", "empatia", "perspicaz", "inefável",
+  "conjuntura", "negligência", "fulcro", "estigma", "procrastinar", "sagaz", "eloquente",
+  "melancolia", "serendipidade", "idiossincrasia", "ubíquo", "verossímil", "prolixo",
+  "sucinto", "astúcia", "benevolente", "célere", "dirimir", "exíguo", "fugaz", "hodierno",
+  "inócuo", "lacônico",
+];
+
+export const getWordOfDay = createServerFn({ method: "GET" }).handler(async () => {
+  const day = Math.floor(Date.now() / 86_400_000);
+  return { term: DAILY_WORDS[day % DAILY_WORDS.length]! };
+});
+
+export const getIntruderRound = createServerFn({ method: "POST" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: rows } = await supabaseAdmin
+    .from("words")
+    .select("display_term, synonyms")
+    .limit(300);
+  const all = rows ?? [];
+  const rich = all.filter((w) => (w.synonyms?.length ?? 0) >= 3);
+  if (rich.length < 2) return { round: null };
+  const base = rich[Math.floor(Math.random() * rich.length)]!;
+  const syns = [...base.synonyms!].sort(() => Math.random() - 0.5).slice(0, 3);
+  const others = all.filter(
+    (w) => w.display_term !== base.display_term && !base.synonyms!.includes(w.display_term),
+  );
+  const intruder = others[Math.floor(Math.random() * others.length)]!.display_term;
+  const options = [...syns, intruder].sort(() => Math.random() - 0.5);
+  return { round: { base: base.display_term, options, intruder } };
+});
+
+const essaySchema = z.object({
+  summary: z.string(),
+  repeated: z.array(z.object({ word: z.string(), count: z.number(), suggestions: z.array(z.string()) })),
+  informal: z.array(z.object({ excerpt: z.string(), suggestion: z.string(), why: z.string() })),
+  improvedText: z.string(),
+});
+
+export const analyzeEssay = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ text: z.string().min(20).max(4000) }).parse(input))
+  .handler(async ({ data }) => {
+    try {
+      const result = streamText({
+        model: aiModel(),
+        system: `Você é o LEXY, professor de redação (ENEM e vestibulares) para estudantes brasileiros.
+Analise o vocabulário do texto do aluno, em português do Brasil, com linguagem simples.
+- summary: 1 ou 2 frases de avaliação geral do vocabulário.
+- repeated: palavras repetidas de forma excessiva (não conte artigos, preposições ou conjunções simples), com count e 2 a 4 sinônimos adequados ao contexto.
+- informal: trechos informais, vagos ou clichês, com suggestion formal precisa e why curto.
+- improvedText: o texto reescrito com vocabulário mais rico, sem mudar as ideias do aluno.`,
+        prompt: `Texto do aluno:\n"""\n${data.text}\n"""`,
+        output: Output.object({ schema: essaySchema }),
+        providerOptions: reasoningOptions,
+      });
+      return await result.output;
+    } catch (error) {
+      console.error("[lexy] analyzeEssay", error);
+      throw new Error("Não foi possível analisar o texto agora. Tente novamente.");
     }
   });

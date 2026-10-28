@@ -12,9 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as JogosRouteImport } from './routes/jogos'
+import { Route as TrilhasRouteImport } from './routes/trilhas'
 import { Route as AuthenticatedEstudoRouteImport } from './routes/_authenticated/estudo'
 import { Route as AuthenticatedExerciciosRouteImport } from './routes/_authenticated/exercicios'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedRedacaoRouteImport } from './routes/_authenticated/redacao'
+import { Route as AuthenticatedReforcoRouteImport } from './routes/_authenticated/reforco'
 import { Route as AuthenticatedRevisaoRouteImport } from './routes/_authenticated/revisao'
 import { Route as AuthenticatedTemaRouteImport } from './routes/_authenticated/tema'
 import { Route as AuthenticatedVocabularioRouteImport } from './routes/_authenticated/vocabulario'
@@ -35,6 +39,16 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JogosRoute = JogosRouteImport.update({
+  id: '/jogos',
+  path: '/jogos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrilhasRoute = TrilhasRouteImport.update({
+  id: '/trilhas',
+  path: '/trilhas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedEstudoRoute = AuthenticatedEstudoRouteImport.update({
   id: '/estudo',
   path: '/estudo',
@@ -48,6 +62,16 @@ const AuthenticatedExerciciosRoute = AuthenticatedExerciciosRouteImport.update({
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRedacaoRoute = AuthenticatedRedacaoRouteImport.update({
+  id: '/redacao',
+  path: '/redacao',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReforcoRoute = AuthenticatedReforcoRouteImport.update({
+  id: '/reforco',
+  path: '/reforco',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRevisaoRoute = AuthenticatedRevisaoRouteImport.update({
@@ -80,9 +104,13 @@ const PalavraTermoRoute = PalavraTermoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/jogos': typeof JogosRoute
+  '/trilhas': typeof TrilhasRoute
   '/estudo': typeof AuthenticatedEstudoRoute
   '/exercicios': typeof AuthenticatedExerciciosRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/redacao': typeof AuthenticatedRedacaoRoute
+  '/reforco': typeof AuthenticatedReforcoRoute
   '/revisao': typeof AuthenticatedRevisaoRoute
   '/tema': typeof AuthenticatedTemaRoute
   '/vocabulario': typeof AuthenticatedVocabularioRoute
@@ -92,9 +120,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/jogos': typeof JogosRoute
+  '/trilhas': typeof TrilhasRoute
   '/estudo': typeof AuthenticatedEstudoRoute
   '/exercicios': typeof AuthenticatedExerciciosRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/redacao': typeof AuthenticatedRedacaoRoute
+  '/reforco': typeof AuthenticatedReforcoRoute
   '/revisao': typeof AuthenticatedRevisaoRoute
   '/tema': typeof AuthenticatedTemaRoute
   '/vocabulario': typeof AuthenticatedVocabularioRoute
@@ -106,9 +138,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/jogos': typeof JogosRoute
+  '/trilhas': typeof TrilhasRoute
   '/_authenticated/estudo': typeof AuthenticatedEstudoRoute
   '/_authenticated/exercicios': typeof AuthenticatedExerciciosRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/redacao': typeof AuthenticatedRedacaoRoute
+  '/_authenticated/reforco': typeof AuthenticatedReforcoRoute
   '/_authenticated/revisao': typeof AuthenticatedRevisaoRoute
   '/_authenticated/tema': typeof AuthenticatedTemaRoute
   '/_authenticated/vocabulario': typeof AuthenticatedVocabularioRoute
@@ -120,9 +156,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/jogos'
+    | '/trilhas'
     | '/estudo'
     | '/exercicios'
     | '/perfil'
+    | '/redacao'
+    | '/reforco'
     | '/revisao'
     | '/tema'
     | '/vocabulario'
@@ -132,9 +172,13 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/jogos'
+    | '/trilhas'
     | '/estudo'
     | '/exercicios'
     | '/perfil'
+    | '/redacao'
+    | '/reforco'
     | '/revisao'
     | '/tema'
     | '/vocabulario'
@@ -145,9 +189,13 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/jogos'
+    | '/trilhas'
     | '/_authenticated/estudo'
     | '/_authenticated/exercicios'
     | '/_authenticated/perfil'
+    | '/_authenticated/redacao'
+    | '/_authenticated/reforco'
     | '/_authenticated/revisao'
     | '/_authenticated/tema'
     | '/_authenticated/vocabulario'
@@ -159,6 +207,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  JogosRoute: typeof JogosRoute
+  TrilhasRoute: typeof TrilhasRoute
   ApiPronunciaRoute: typeof ApiPronunciaRoute
   PalavraTermoRoute: typeof PalavraTermoRoute
 }
@@ -186,6 +236,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/jogos': {
+      id: '/jogos'
+      path: '/jogos'
+      fullPath: '/jogos'
+      preLoaderRoute: typeof JogosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trilhas': {
+      id: '/trilhas'
+      path: '/trilhas'
+      fullPath: '/trilhas'
+      preLoaderRoute: typeof TrilhasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/estudo': {
       id: '/_authenticated/estudo'
       path: '/estudo'
@@ -205,6 +269,20 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/redacao': {
+      id: '/_authenticated/redacao'
+      path: '/redacao'
+      fullPath: '/redacao'
+      preLoaderRoute: typeof AuthenticatedRedacaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reforco': {
+      id: '/_authenticated/reforco'
+      path: '/reforco'
+      fullPath: '/reforco'
+      preLoaderRoute: typeof AuthenticatedReforcoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/revisao': {
@@ -249,6 +327,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEstudoRoute: typeof AuthenticatedEstudoRoute
   AuthenticatedExerciciosRoute: typeof AuthenticatedExerciciosRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedRedacaoRoute: typeof AuthenticatedRedacaoRoute
+  AuthenticatedReforcoRoute: typeof AuthenticatedReforcoRoute
   AuthenticatedRevisaoRoute: typeof AuthenticatedRevisaoRoute
   AuthenticatedTemaRoute: typeof AuthenticatedTemaRoute
   AuthenticatedVocabularioRoute: typeof AuthenticatedVocabularioRoute
@@ -258,6 +338,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEstudoRoute: AuthenticatedEstudoRoute,
   AuthenticatedExerciciosRoute: AuthenticatedExerciciosRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedRedacaoRoute: AuthenticatedRedacaoRoute,
+  AuthenticatedReforcoRoute: AuthenticatedReforcoRoute,
   AuthenticatedRevisaoRoute: AuthenticatedRevisaoRoute,
   AuthenticatedTemaRoute: AuthenticatedTemaRoute,
   AuthenticatedVocabularioRoute: AuthenticatedVocabularioRoute,
@@ -270,6 +352,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  JogosRoute: JogosRoute,
+  TrilhasRoute: TrilhasRoute,
   ApiPronunciaRoute: ApiPronunciaRoute,
   PalavraTermoRoute: PalavraTermoRoute,
 }

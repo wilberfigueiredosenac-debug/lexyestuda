@@ -1,3 +1,4 @@
+import { AccessibilityControls } from "@/components/AccessibilityControls";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -226,6 +227,10 @@ function ProfilePage() {
           <p className="mt-1 text-sm text-muted-foreground">Escolha as cores que deixam o estudo mais confortável.</p>
         </div>
         <ThemePicker />
+        <div className="border-t-2 border-border pt-4">
+          <p className="mb-2 text-sm font-bold">Tamanho e tipo de letra</p>
+          <AccessibilityControls />
+        </div>
       </section>
 
       <StudyGoalCalculator onUseGoal={setTarget} />

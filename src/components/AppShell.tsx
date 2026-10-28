@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookMarked, CalendarCheck, Home, LogOut, Palette, Sparkles, User, Wand2 } from "lucide-react";
+import { BookMarked, CalendarCheck, Gamepad2, Home, LogOut, Palette, PenLine, Route as RouteIcon, Sparkles, Target, User, Wand2 } from "lucide-react";
 import { StudyReminder } from "@/components/StudyReminder";
 import type { ReactNode } from "react";
 import { displayName, useAuth } from "@/lib/auth";
@@ -65,6 +65,10 @@ function UserMenu() {
         <DropdownMenuItem asChild><Link to="/vocabulario"><BookMarked className="mr-2 h-4 w-4" />Meu vocabulário</Link></DropdownMenuItem>
         <DropdownMenuItem asChild><Link to="/estudo"><CalendarCheck className="mr-2 h-4 w-4" />Estudo diário</Link></DropdownMenuItem>
         <DropdownMenuItem asChild><Link to="/tema"><Palette className="mr-2 h-4 w-4" />Exercícios por tema</Link></DropdownMenuItem>
+        <DropdownMenuItem asChild><Link to="/redacao"><PenLine className="mr-2 h-4 w-4" />Vocabulário da redação</Link></DropdownMenuItem>
+        <DropdownMenuItem asChild><Link to="/reforco"><Target className="mr-2 h-4 w-4" />Precisa de atenção</Link></DropdownMenuItem>
+        <DropdownMenuItem asChild><Link to="/jogos"><Gamepad2 className="mr-2 h-4 w-4" />Caça ao Intruso</Link></DropdownMenuItem>
+        <DropdownMenuItem asChild><Link to="/trilhas"><RouteIcon className="mr-2 h-4 w-4" />Trilhas de palavras</Link></DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => void signOut()} className="text-destructive focus:text-destructive">
           <LogOut className="mr-2 h-4 w-4" />Sair

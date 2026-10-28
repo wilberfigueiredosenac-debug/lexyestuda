@@ -391,13 +391,16 @@ export const getIntruderRound = createServerFn({ method: "POST" }).handler(async
     .from("words")
     .select("display_term, synonyms")
     .limit(300);
-  const all = rows ?? [];
-  const rich = all.filter((w) => (w.synonyms?.length ?? 0) >= 3);
+  const all = (rows ?? []).map((w) => ({
+    display_term: w.display_term,
+    synonyms: Array.isArray(w.synonyms) ? w.synonyms.filter((x): x is string => typeof x === "string") : [],
+  }));
+  const rich = all.filter((w) => w.synonyms.length >= 3);
   if (rich.length < 2) return { round: null };
   const base = rich[Math.floor(Math.random() * rich.length)]!;
-  const syns = [...base.synonyms!].sort(() => Math.random() - 0.5).slice(0, 3);
+  const syns = [...base.synonyms].sort(() => Math.random() - 0.5).slice(0, 3);
   const others = all.filter(
-    (w) => w.display_term !== base.display_term && !base.synonyms!.includes(w.display_term),
+    (w) => w.display_term !== base.display_term && !base.synonyms.includes(w.display_term),
   );
   const intruder = others[Math.floor(Math.random() * others.length)]!.display_term;
   const options = [...syns, intruder].sort(() => Math.random() - 0.5);

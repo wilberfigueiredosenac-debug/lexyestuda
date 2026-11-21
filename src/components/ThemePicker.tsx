@@ -6,11 +6,13 @@ import { cn } from "@/lib/utils";
 
 export const THEME_STORAGE_KEY = "lexy-theme";
 
+// Swatches usam cores fixas de cada tema (não os tokens ativos),
+// para que as opções nunca mudem de aparência ao trocar o tema.
 const themes = [
-  { id: "original", label: "Original", icon: Palette, swatches: ["bg-primary", "bg-secondary", "bg-accent"] },
-  { id: "light", label: "Claro", icon: Sun, swatches: ["bg-background", "bg-secondary", "bg-accent"] },
-  { id: "dark", label: "Escuro", icon: Moon, swatches: ["bg-background", "bg-primary", "bg-accent"] },
-  { id: "purple", label: "Roxo", icon: Sparkles, swatches: ["bg-primary", "bg-secondary", "bg-accent"] },
+  { id: "original", label: "Original", icon: Palette, swatches: ["#1F2A44", "#F4B740", "#2FA66B"] },
+  { id: "light", label: "Claro", icon: Sun, swatches: ["#3B5BDB", "#F2C94C", "#2FA66B"] },
+  { id: "dark", label: "Escuro", icon: Moon, swatches: ["#2A3040", "#F4B740", "#2FA66B"] },
+  { id: "purple", label: "Roxo", icon: Sparkles, swatches: ["#7B2FBE", "#E38BC0", "#3DAA7A"] },
 ] as const;
 
 export type LexyTheme = (typeof themes)[number]["id"];
@@ -56,7 +58,9 @@ export function ThemePicker({ compact = false }: { compact?: boolean }) {
               {theme === id && <Check className="text-accent" aria-hidden />}
             </span>
             <span className="flex h-7 w-full overflow-hidden rounded-md border border-border" aria-hidden>
-              {swatches.map((swatch, index) => <span key={`${id}-${index}`} className={cn("flex-1", swatch)} />)}
+              {swatches.map((swatch, index) => (
+                <span key={`${id}-${index}`} className="flex-1" style={{ backgroundColor: swatch }} />
+              ))}
             </span>
           </Button>
         ))}

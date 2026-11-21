@@ -148,31 +148,6 @@
   --sidebar-ring: oklch(0.82 0.15 83);
 }
 
-[data-theme="purple"] {
-  --background: oklch(0.97 0.018 305);
-  --foreground: oklch(0.25 0.07 305);
-  --ink: oklch(0.25 0.07 305);
-  --paper: oklch(0.97 0.018 305);
-  --card: oklch(0.995 0.008 305);
-  --card-foreground: oklch(0.25 0.07 305);
-  --popover: oklch(0.995 0.008 305);
-  --popover-foreground: oklch(0.25 0.07 305);
-  --primary: oklch(0.48 0.2 305);
-  --primary-foreground: oklch(0.98 0.01 305);
-  --secondary: oklch(0.82 0.11 340);
-  --secondary-foreground: oklch(0.25 0.07 305);
-  --muted: oklch(0.92 0.035 305);
-  --muted-foreground: oklch(0.5 0.06 305);
-  --accent: oklch(0.64 0.15 155);
-  --accent-foreground: oklch(0.98 0.01 305);
-  --border: oklch(0.83 0.055 305);
-  --input: oklch(0.83 0.055 305);
-  --ring: oklch(0.58 0.19 305);
-  --chart-1: oklch(0.58 0.19 305);
-  --chart-2: oklch(0.64 0.15 155);
-  --chart-3: oklch(0.65 0.14 340);
-}
-
 @layer base {
   * {
     border-color: var(--color-border);

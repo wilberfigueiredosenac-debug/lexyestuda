@@ -1,4 +1,4 @@
-import { Check, Moon, Palette, Sparkles, Sun } from "lucide-react";
+import { Check, Moon, Palette, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -12,7 +12,6 @@ const themes = [
   { id: "original", label: "Original", icon: Palette, swatches: ["#1F2A44", "#F4B740", "#2FA66B"] },
   { id: "light", label: "Claro", icon: Sun, swatches: ["#3B5BDB", "#F2C94C", "#2FA66B"] },
   { id: "dark", label: "Escuro", icon: Moon, swatches: ["#2A3040", "#F4B740", "#2FA66B"] },
-  { id: "purple", label: "Roxo", icon: Sparkles, swatches: ["#7B2FBE", "#E38BC0", "#3DAA7A"] },
 ] as const;
 
 export type LexyTheme = (typeof themes)[number]["id"];
@@ -40,7 +39,7 @@ export function ThemePicker({ compact = false }: { compact?: boolean }) {
 
   if (!compact) {
     return (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Tema de cores">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label="Tema de cores">
         {themes.map(({ id, label, icon: Icon, swatches }) => (
           <Button
             key={id}

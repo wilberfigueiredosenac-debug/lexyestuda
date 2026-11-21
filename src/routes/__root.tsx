@@ -120,7 +120,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('lexy-theme')||'original';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t==='dark'?'dark':'light';var f=Number(localStorage.getItem('lexy-font-size'));if(f)document.documentElement.style.fontSize=f+'%';document.documentElement.dataset.readable=localStorage.getItem('lexy-readable')==='on'?'on':'off'}catch(e){}})()`,
+            __html: `(function(){try{var t=localStorage.getItem('lexy-theme')||'original';if(t!=='original'&&t!=='light'&&t!=='dark')t='original';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t==='dark'?'dark':'light';var f=Number(localStorage.getItem('lexy-font-size'));if(f)document.documentElement.style.fontSize=f+'%';document.documentElement.dataset.readable=localStorage.getItem('lexy-readable')==='on'?'on':'off'}catch(e){}})()`,
           }}
         />
         <HeadContent />

@@ -44,6 +44,18 @@ function aiModel() {
   return lovable.responses("openai/gpt-6-astra");
 }
 
+// Gemini (via AI Gateway) para gerar perguntas de revisão.
+function geminiModel() {
+  const key = process.env["LOVABLE_API_KEY"];
+  if (!key) throw new Error("A inteligência artificial não está configurada.");
+  const lovable = createOpenAI({
+    baseURL: "https://ai.gateway.lovable.dev/v1",
+    apiKey: key,
+    headers: { "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
+  });
+  return lovable.chat("google/gemini-3-flash-preview");
+}
+
 const reasoningOptions = {
   openai: {
     forceReasoning: true,
@@ -221,14 +233,14 @@ export const generateReview = createServerFn({ method: "POST" })
 
     try {
       const result = streamText({
-        model: aiModel(),
+        model: geminiModel(),
         system:
           "Você é o LEXY, professor de Língua Portuguesa. Crie perguntas de múltipla escolha, em português do Brasil, com linguagem simples para estudantes. Cada pergunta tem exatamente 4 alternativas, apenas uma correta, e correctIndex é o índice (0 a 3) da alternativa correta. explanation é uma frase curta explicando a resposta certa. Varie o tipo (significado, sinônimo, antônimo, contexto, completar frase, uso correto) e invente frases de contexto novas a cada vez." + NO_GIVEAWAY,
         prompt: `Crie uma pergunta para cada palavra abaixo, na mesma ordem:\n${pool
           .map((item) => `- ${item.term}: ${item.meaning}`)
           .join("\n")}\nSemente de variação: ${Date.now()}${avoidBlock(previous)}`,
         output: Output.object({ schema: quizSchema }),
-        providerOptions: reasoningOptions,
+        
       });
       const quiz = await result.output;
       return {

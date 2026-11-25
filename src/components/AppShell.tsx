@@ -1,3 +1,4 @@
+import { CookieNotice } from "@/components/CookieNotice";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { BookMarked, CalendarCheck, Gamepad2, Home, LogOut, Route as RouteIcon, Sparkles, Target, User, Wand2 } from "lucide-react";
@@ -116,10 +117,20 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 pb-28 pt-6 md:px-6 lg:max-w-5xl lg:pb-12 xl:max-w-6xl">
+      <main className="mx-auto w-full max-w-4xl flex-1 px-4 pb-6 pt-6 md:px-6 lg:max-w-5xl lg:pb-6 xl:max-w-6xl">
         {user && <StudyReminder />}
         {children}
       </main>
+
+      <footer className="mx-auto w-full max-w-4xl px-4 pb-28 pt-2 text-center text-xs text-muted-foreground lg:max-w-5xl lg:pb-8">
+        <nav aria-label="Informações legais" className="flex flex-wrap justify-center gap-x-4 gap-y-1 font-bold">
+          <Link to="/privacidade" className="underline-offset-2 hover:underline">Privacidade</Link>
+          <Link to="/termos" className="underline-offset-2 hover:underline">Termos de uso</Link>
+          <Link to="/cookies" className="underline-offset-2 hover:underline">Cookies</Link>
+        </nav>
+        <p className="mt-2">LEXY — projeto integrador escolar, gratuito e sem fins lucrativos. Conteúdo gerado por IA pode conter erros.</p>
+      </footer>
+      <CookieNotice />
 
       <nav className="fixed bottom-0 left-0 right-0 z-20 border-t-2 border-border bg-background lg:hidden" aria-label="Navegação">
         <div className="mx-auto flex w-full max-w-4xl">

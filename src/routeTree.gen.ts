@@ -12,7 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as JogosRouteImport } from './routes/jogos'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as TrilhasRouteImport } from './routes/trilhas'
 import { Route as AuthenticatedEstudoRouteImport } from './routes/_authenticated/estudo'
 import { Route as AuthenticatedExerciciosRouteImport } from './routes/_authenticated/exercicios'
@@ -39,9 +42,24 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const JogosRoute = JogosRouteImport.update({
   id: '/jogos',
   path: '/jogos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrilhasRoute = TrilhasRouteImport.update({
@@ -104,7 +122,10 @@ const PalavraTermoRoute = PalavraTermoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/cookies': typeof CookiesRoute
   '/jogos': typeof JogosRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/trilhas': typeof TrilhasRoute
   '/estudo': typeof AuthenticatedEstudoRoute
   '/exercicios': typeof AuthenticatedExerciciosRoute
@@ -120,7 +141,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/cookies': typeof CookiesRoute
   '/jogos': typeof JogosRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/trilhas': typeof TrilhasRoute
   '/estudo': typeof AuthenticatedEstudoRoute
   '/exercicios': typeof AuthenticatedExerciciosRoute
@@ -138,7 +162,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/cookies': typeof CookiesRoute
   '/jogos': typeof JogosRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/trilhas': typeof TrilhasRoute
   '/_authenticated/estudo': typeof AuthenticatedEstudoRoute
   '/_authenticated/exercicios': typeof AuthenticatedExerciciosRoute
@@ -156,7 +183,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/cookies'
     | '/jogos'
+    | '/privacidade'
+    | '/termos'
     | '/trilhas'
     | '/estudo'
     | '/exercicios'
@@ -172,7 +202,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/cookies'
     | '/jogos'
+    | '/privacidade'
+    | '/termos'
     | '/trilhas'
     | '/estudo'
     | '/exercicios'
@@ -189,7 +222,10 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/cookies'
     | '/jogos'
+    | '/privacidade'
+    | '/termos'
     | '/trilhas'
     | '/_authenticated/estudo'
     | '/_authenticated/exercicios'
@@ -207,7 +243,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  CookiesRoute: typeof CookiesRoute
   JogosRoute: typeof JogosRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
+  TermosRoute: typeof TermosRoute
   TrilhasRoute: typeof TrilhasRoute
   ApiPronunciaRoute: typeof ApiPronunciaRoute
   PalavraTermoRoute: typeof PalavraTermoRoute
@@ -236,11 +275,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/jogos': {
       id: '/jogos'
       path: '/jogos'
       fullPath: '/jogos'
       preLoaderRoute: typeof JogosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trilhas': {
@@ -352,7 +412,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  CookiesRoute: CookiesRoute,
   JogosRoute: JogosRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
+  TermosRoute: TermosRoute,
   TrilhasRoute: TrilhasRoute,
   ApiPronunciaRoute: ApiPronunciaRoute,
   PalavraTermoRoute: PalavraTermoRoute,

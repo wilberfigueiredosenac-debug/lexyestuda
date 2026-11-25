@@ -170,6 +170,31 @@ const quizSchema = z.object({
   ),
 });
 
+async function recentQuestions(supabase: { from: (t: "reviews") => any }, userId: string) {
+  const { data } = await supabase
+    .from("reviews")
+    .select("question")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(80);
+  return Array.from(
+    new Set(((data ?? []) as Array<{ question: string | null }>).map((r) => (r.question ?? "").trim()).filter(Boolean)),
+  ) as string[];
+}
+
+const normQ = (q: string) => q.toLowerCase().replace(/[^\p{L}\p{N} ]/gu, "").replace(/\s+/g, " ").trim();
+
+function avoidBlock(previous: string[]) {
+  if (previous.length === 0) return "";
+  return `\n\nO aluno JÁ RESPONDEU as perguntas abaixo. NÃO repita nenhuma delas nem crie versões parecidas: mude o tipo de pergunta, a frase de contexto e as alternativas.\n${previous
+    .slice(0, 60)
+    .map((q) => `- ${q}`)
+    .join("\n")}`;
+}
+
+const NO_GIVEAWAY =
+  " O enunciado NUNCA pode entregar a resposta: não escreva a alternativa correta (nem a definição dela) dentro da pergunta, e nenhuma alternativa pode repetir o enunciado.";
+
 export const generateReview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -191,22 +216,24 @@ export const generateReview = createServerFn({ method: "POST" })
     if (items.length === 0) return { questions: [] as Array<z.infer<typeof quizSchema>["questions"][number] & { wordId: string | null }> };
 
     const pool = items.sort(() => Math.random() - 0.5).slice(0, 5);
+    const previous = await recentQuestions(context.supabase as never, context.userId);
+    const previousSet = new Set(previous.map(normQ));
 
     try {
       const result = streamText({
         model: aiModel(),
         system:
-          "Você é o LEXY, professor de Língua Portuguesa. Crie perguntas de múltipla escolha, em português do Brasil, com linguagem simples para estudantes. Cada pergunta tem exatamente 4 alternativas, apenas uma correta, e correctIndex é o índice (0 a 3) da alternativa correta. explanation é uma frase curta explicando a resposta certa.",
+          "Você é o LEXY, professor de Língua Portuguesa. Crie perguntas de múltipla escolha, em português do Brasil, com linguagem simples para estudantes. Cada pergunta tem exatamente 4 alternativas, apenas uma correta, e correctIndex é o índice (0 a 3) da alternativa correta. explanation é uma frase curta explicando a resposta certa. Varie o tipo (significado, sinônimo, antônimo, contexto, completar frase, uso correto) e invente frases de contexto novas a cada vez." + NO_GIVEAWAY,
         prompt: `Crie uma pergunta para cada palavra abaixo, na mesma ordem:\n${pool
           .map((item) => `- ${item.term}: ${item.meaning}`)
-          .join("\n")}`,
+          .join("\n")}\nSemente de variação: ${Date.now()}${avoidBlock(previous)}`,
         output: Output.object({ schema: quizSchema }),
         providerOptions: reasoningOptions,
       });
       const quiz = await result.output;
       return {
-        questions: quiz.questions.slice(0, pool.length).map((question, index) => ({
-          ...question,
+        questions: quiz.questions.slice(0, pool.length).filter((q) => !previousSet.has(normQ(q.question))).map((question, index) => ({
+          ...shuffleOptions(question),
           term: question.term || pool[index]?.term || "",
           wordId: pool[index]?.wordId ?? null,
         })),
@@ -295,7 +322,9 @@ export const generateCustomExercises = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const previous = await recentQuestions(context.supabase as never, context.userId);
+    const previousSet = new Set(previous.map(normQ));
     try {
       const result = streamText({
         model: aiModel(),
@@ -317,13 +346,13 @@ Use estes tipos (campo type) e VARIE: nunca repita o mesmo tipo em duas pergunta
 - "polissemia": em qual frase a palavra tem um sentido diferente dos outros.
 - "uso correto": qual das 4 frases usa a palavra corretamente.
 - "intruso": qual palavra não pertence ao mesmo campo de sentido.
-Regras das alternativas: exatamente 4, todas diferentes, da mesma classe gramatical e de tamanho parecido; as erradas devem ser plausíveis (confusões comuns de estudantes), nunca absurdas ou engraçadas; não use "todas as anteriores" nem "nenhuma das anteriores". Não repita a mesma pergunta. correctIndex é o índice (0 a 3) da correta; term é a palavra trabalhada; explanation é uma frase curta explicando por que a resposta está certa.
+Regras das alternativas: exatamente 4, todas diferentes, da mesma classe gramatical e de tamanho parecido; as erradas devem ser plausíveis (confusões comuns de estudantes), nunca absurdas ou engraçadas; não use "todas as anteriores" nem "nenhuma das anteriores". Não repita a mesma pergunta.${NO_GIVEAWAY} correctIndex é o índice (0 a 3) da correta; term é a palavra trabalhada; explanation é uma frase curta explicando por que a resposta está certa.
 
 FRASES PARA ESCREVER (sentences)
 Crie de 2 a 3 desafios em que o aluno escreve uma frase própria que PROVE que entendeu o significado de term. O prompt deve dar uma situação concreta e exigir que o sentido fique claro pelo contexto, por exemplo: "Escreva uma frase sobre um fim de semana em que fique claro que 'efêmero' significa algo que dura pouco." Evite pedidos vagos como "Escreva uma frase com a palavra X". sampleAnswer é um exemplo de boa resposta em que o sentido fica evidente.
 
 words: lista com as palavras trabalhadas (em minúsculas, sem repetição).`,
-        prompt: `Crie exatamente ${data.count} exercícios de múltipla escolha e de 2 a 3 frases para responder a partir de:\n"""\n${data.source}\n"""`,
+        prompt: `Crie exatamente ${data.count} exercícios de múltipla escolha e de 2 a 3 frases para responder a partir de:\n"""\n${data.source}\n"""\nSemente de variação: ${Date.now()}${avoidBlock(previous)}`,
         output: Output.object({ schema: customQuizSchema.extend({ words: z.array(z.string()) }) }),
         providerOptions: reasoningOptions,
       });
@@ -332,8 +361,8 @@ words: lista com as palavras trabalhadas (em minúsculas, sem repetição).`,
       const questions = quiz.questions
         .filter((q) => q.options.length >= 2 && q.correctIndex >= 0 && q.correctIndex < q.options.length)
         .filter((q) => {
-          const key = q.question.trim().toLowerCase();
-          if (seen.has(key)) return false;
+          const key = normQ(q.question);
+          if (seen.has(key) || previousSet.has(key)) return false;
           seen.add(key);
           return true;
         })

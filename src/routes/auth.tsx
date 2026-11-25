@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -39,6 +39,7 @@ function AuthPage() {
   const [confirmSent, setConfirmSent] = useState(false);
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [agreed, setAgreed] = useState(false);
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/", replace: true });
@@ -46,6 +47,10 @@ function AuthPage() {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (mode === "signup" && !agreed) {
+      toast.error("Aceite os Termos de uso e a Política de privacidade para criar a conta.");
+      return;
+    }
     if (mode === "signup" && password !== confirm) {
       toast.error("As senhas não são iguais.");
       return;
@@ -186,6 +191,15 @@ function AuthPage() {
                     className={inputCls}
                     autoComplete="new-password"
                   />
+                </label>
+              )}
+              {mode === "signup" && (
+                <label className="flex items-start gap-2 text-sm">
+                  <input type="checkbox" required checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-1 h-4 w-4 accent-[var(--primary)]" />
+                  <span>
+                    Li e aceito os <Link to="/termos" className="font-bold underline">Termos de uso</Link> e a{" "}
+                    <Link to="/privacidade" className="font-bold underline">Política de privacidade</Link>.
+                  </span>
                 </label>
               )}
               <button
